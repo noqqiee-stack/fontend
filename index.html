@@ -196,9 +196,6 @@ img{display:block}
         </div>
         <div class="lii" id="lii"></div>
         <div class="lctrl">
-          <button class="cb2 prof" id="ptog">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Выгодные
-          </button>
           <button class="cb2" id="ropen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
             <span id="rbtnlbl">Редкость</span>
@@ -232,7 +229,6 @@ img{display:block}
       <div class="stl" style="padding-top:10px">
         <div class="srow"><div><div class="snm">Уведомления</div><div class="sds">О новых лотах по последним фильтрам</div></div><label class="tgl"><input type="checkbox" id="ntf"><div class="ttr"></div><div class="tth"></div></label></div>
         <div class="srow"><div><div class="snm">Лотов на страницу</div><div class="sds">Количество лотов за один запрос</div></div><div class="stp"><button class="stpb" id="im">−</button><div class="stpv" id="iv">10</div><button class="stpb" id="ip">+</button></div></div>
-        <div class="srow"><div><div class="snm">Порог выгоды</div><div class="sds">Скидка от медианы для «Выгодных»</div></div><div class="stp"><button class="stpb" id="tm">−</button><div class="stpv" id="tv">20<span style="font-size:9px;opacity:.5">%</span></div><button class="stpb" id="tp">+</button></div></div>
         <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v6.0</span> — STALCRAFT Аукцион · База данных EXBO-Studio</div>
       </div>
     </div>
@@ -322,20 +318,20 @@ if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0a0b0d');tg.setBackgroundColor
 // ══ ЦВЕТА И РЕДКОСТИ ════════════════════════════════════════
 // Артефакты: quality 0-5
 const ART = [
-  {q:[0], n:'Обычный',        c:'#9ca3af'},
-  {q:[1], n:'Необычный',      c:'#4ade80'},
-  {q:[2], n:'Особый',         c:'#60a5fa'},
-  {q:[3], n:'Редкий',         c:'#c084fc'},
-  {q:[4], n:'Исключительный', c:'#f97474'},
-  {q:[5], n:'Легендарный',    c:'#fbbf24'},
+  {q:[0], n:'Обычный',        c:'#ffffff'}, // белый
+  {q:[1], n:'Необычный',      c:'#4ade80'}, // зелёный
+  {q:[2], n:'Особый',         c:'#60a5fa'}, // синий
+  {q:[3], n:'Редкий',         c:'#f97474'}, // красный
+  {q:[4], n:'Исключительный', c:'#f97474'}, // красный
+  {q:[5], n:'Легендарный',    c:'#fbbf24'}, // жёлтый
 ];
-// Предметы: rank quality 0-4
+// Остальные предметы: ранги 0-4
 const RNK = [
-  {q:[0], n:'Отмычка', c:'#9ca3af'},
-  {q:[1], n:'Сталкер', c:'#60a5fa'},
-  {q:[2], n:'Ветеран',  c:'#f472b6'},
-  {q:[3], n:'Мастер',   c:'#f97474'},
-  {q:[4,5], n:'Легенда',c:'#fbbf24'},
+  {q:[0],   n:'Отмычка', c:'#ffffff'}, // белый
+  {q:[1],   n:'Сталкер', c:'#4ade80'}, // ближе к «новичек»/зелёный
+  {q:[2],   n:'Ветеран', c:'#60a5fa'}, // синий
+  {q:[3],   n:'Мастер',  c:'#f472b6'}, // розовый / красный
+  {q:[4,5], n:'Легенда', c:'#fbbf24'}, // жёлтый
 ];
 
 function getRarInfo(quality, isArt) {
@@ -367,12 +363,12 @@ const CATS = {
 // ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
 const S = {
   flt:    {cat:'', enh:-1, qf:null, qt:null},
-  sort:   {f:'price', d:'asc'},
+  sort:   {f:'price', d:'desc'}, // по ТЗ: сначала по убыванию
   rarFilter: [],  // выбранные quality numbers для лотов
   prof:   false,
   item:   null,
   lots:[], total:0, page:0, pages:1, loading:false,
-  cfg:    {notif:false, ipp:10, thr:20},
+  cfg:    {notif:false, ipp:10},
   chart:  null, favMode:false, recMode:false,
 };
 
@@ -434,7 +430,10 @@ function mkItemCard(item) {
   const sub = rarity_name
     ? `${CATS[cat]||cat} · <span style="color:${color_hex};font-weight:700">${rarity_name}</span>`
     : (CATS[cat]||cat);
-  info.innerHTML=`<div class="iname" style="color:${color_hex}">${name||id}</div><div class="isub">${sub}</div>`;
+  // Для артефактов имя всегда окрашиваем в цвет редкости
+  const isArt = isArtCat(cat);
+  const titleColor = isArt ? color_hex : color_hex;
+  info.innerHTML=`<div class="iname" style="color:${titleColor}">${name||id}</div><div class="isub">${sub}</div>`;
   card.appendChild(info);
   const star=document.createElement('button'); star.className=`star${fav?' on':''}`; star.textContent='★';
   star.addEventListener('click',e=>{e.stopPropagation();togFav(id);star.classList.toggle('on',isFav(id));});
@@ -474,8 +473,7 @@ async function searchItems(q='', cat='', favList=null, recList=null) {
 
 // ══ ОТКРЫТИЕ ЛОТОВ ══════════════════════════════════════════
 async function openLots(item) {
-  S.item=item; S.page=0; S.lots=[]; S.prof=false; S.rarFilter=[];
-  $('ptog').classList.remove('on');
+  S.item=item; S.page=0; S.lots=[]; S.rarFilter=[];
   $('ropen').classList.remove('on');
   addRec(item.id, item.name||item.id, item.category||'misc', item.cat_path||'', item.icon_path||'');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -487,8 +485,14 @@ async function openLots(item) {
   const clr=item.color_hex||'#9ca3af';
   const rname=item.rarity_name||'';
 
-  // Кнопка редкости — для всех предметов
-  $('rbtnlbl').textContent = art ? 'Редкость' : 'Ранг';
+  // Редкость оставляем только для артефактов, ранговой фильтрации не делаем
+  if(art){
+    $('ropen').style.display='inline-flex';
+    $('rbtnlbl').textContent='Редкость';
+  }else{
+    $('ropen').style.display='none';
+    S.rarFilter=[];
+  }
 
   const lii=$('lii'); lii.innerHTML='';
   lii.appendChild(mkIcon(item.icon_path||'', item.id, 44));
@@ -507,28 +511,25 @@ async function loadLots(page=0) {
   try {
     const item=S.item; if(!item) return;
     let lots=[], total=0, pages=1;
-    if(S.prof) {
-      const p=new URLSearchParams({q:item.name||item.id, threshold:((100-S.cfg.thr)/100).toFixed(2)});
-      if(item.category)p.set('category',item.category);
-      const d=await fetch(`${BACKEND}/api/profitable?${p}`).then(r=>r.json());
-      lots=d.lots||[]; total=lots.length; pages=1;
-    } else {
-      const p=new URLSearchParams({sort:S.sort.f, asc:S.sort.d==='asc', page, per_page:S.cfg.ipp});
-      p.set('q', item.name||item.id);
-      if(item.category)p.set('category',item.category);
-      // Map rarFilter quality numbers to rarity param
-      if(S.rarFilter.length) {
-        // Find which rarity key covers these quality numbers
-        const rarKeys = {white:[0],green:[1],blue:[2],purple:[3],red:[4],yellow:[5]};
-        const matched = Object.entries(rarKeys).find(([k,v])=>v.some(q=>S.rarFilter.includes(q)));
-        if(matched) p.set('rarity', matched[0]);
-      }
-      if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
-      if(S.flt.qf)p.set('qty_from',S.flt.qf); if(S.flt.qt)p.set('qty_to',S.flt.qt);
-      const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
-      lots=d.lots||[]; total=d.total||0; pages=d.pages||1;
-      S.total=total; S.pages=pages;
+    const p=new URLSearchParams({page, per_page:S.cfg.ipp});
+    p.set('q', item.name||item.id);
+    if(item.category)p.set('category',item.category);
+    // сортировка: по ТЗ три состояния, но на сервер всё равно отправляем sort/asc
+    if(S.sort.f){
+      p.set('sort', S.sort.f);
+      p.set('asc', S.sort.d==='asc');
     }
+    // Фильтр редкости только для артефактов
+    if(S.rarFilter.length && isArtCat(item.category||'')) {
+      const rarKeys = {white:[0],green:[1],blue:[2],red:[3,4],yellow:[5]};
+      const matched = Object.entries(rarKeys).find(([k,v])=>v.some(q=>S.rarFilter.includes(q)));
+      if(matched) p.set('rarity', matched[0]);
+    }
+    if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
+    if(S.flt.qf)p.set('qty_from',S.flt.qf); if(S.flt.qt)p.set('qty_to',S.flt.qt);
+    const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
+    lots=d.lots||[]; total=d.total||0; pages=d.pages||1;
+    S.total=total; S.pages=pages;
     if(page===0) list.innerHTML='';
     S.lots=page===0?lots:[...S.lots,...lots];
     if(!lots.length&&page===0){list.innerHTML=`<div class="empty"><div class="et">Лотов нет</div><div class="es">На аукционе нет активных лотов</div></div>`;}
@@ -563,7 +564,7 @@ function mkLotCard(lot) {
   const urg=time.includes('м')&&parseInt(time)<15;
   const studied=lot._studied??add.isResearched??add.researched??null;
   const card=document.createElement('div'); card.className='lc';
-  let discH=lot._discount?`<div class="ldsc">−${lot._discount}%</div>`:'';
+  let discH='';
   let studH=art&&studied!==null?(studied?`<span class="bg bg-ok">Изучен</span>`:`<span class="bg bg-q">Не изучен</span>`):'';
   card.innerHTML=`<div class="lbar" style="background:${clr}"></div>
   <div class="lbody">
@@ -584,8 +585,7 @@ function mkLotCard(lot) {
   return card;
 }
 
-// ══ ВЫГОДНЫЕ / НАЗАД ════════════════════════════════════════
-$('ptog').addEventListener('click',()=>{ S.prof=!S.prof; $('ptog').classList.toggle('on',S.prof); loadLots(0); });
+// ══ НАЗАД ═══════════════════════════════════════════════════
 $('lbk').addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -594,18 +594,40 @@ $('lbk').addEventListener('click',()=>{
   $('cnt').scrollTop=0;
 });
 
-// ══ СОРТИРОВКА ══════════════════════════════════════════════
+// ══ СОРТИРОВКА (три состояния) ══════════════════════════════
 $('sopen').addEventListener('click',()=>{ $('sov').classList.add('on'); $('ssh').classList.add('on'); });
 $('sov').addEventListener('click',()=>{ $('sov').classList.remove('on'); $('ssh').classList.remove('on'); loadLots(0); });
-document.querySelectorAll('#sfld .sc2').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('#sfld .sc2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.f=b.dataset.f; }); });
-document.querySelectorAll('.db').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('.db').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.d=b.dataset.d; }); });
+
+// убираем отдельный выбор направления – всё в одной кнопке
+document.querySelectorAll('.db').forEach(b=>{ b.style.display='none'; });
+
+document.querySelectorAll('#sfld .sc2').forEach(b=>{
+  b.dataset.state='off';
+  b.addEventListener('click',()=>{
+    const field=b.dataset.f;
+    // цикл: off -> desc -> asc -> off
+    let st=b.dataset.state||'off';
+    if(st==='off') st='desc';
+    else if(st==='desc') st='asc';
+    else st='off';
+    // сбрасываем все остальные
+    document.querySelectorAll('#sfld .sc2').forEach(x=>{ x.classList.remove('on'); x.dataset.state='off'; });
+    if(st==='off'){
+      S.sort={f:'',d:''};
+    }else{
+      b.classList.add('on');
+      b.dataset.state=st;
+      S.sort={f:field,d:st};
+    }
+  });
+});
 
 // ══ ШТОРКА РЕДКОСТИ / РАНГА ════════════════════════════════
 function buildRarList() {
   const rl=$('rlist'); rl.innerHTML='';
   const item=S.item, cat=item?.category||'misc', art=isArtCat(cat);
-  const list = art ? ART : RNK;
-  $('rsh-title').textContent = art ? 'Редкость артефакта' : 'Ранг предмета';
+  const list = art ? ART : [];
+  $('rsh-title').textContent = 'Редкость артефакта';
   list.forEach(r=>{
     const on=r.q.some(qv=>S.rarFilter.includes(qv));
     const el=document.createElement('div'); el.className=`ritem${on?' on':''}`; el.style.color=r.c;
@@ -676,7 +698,7 @@ async function loadHist(q){
     const item=items[0];
     const data=await fetch(`${BACKEND}/api/history/${item.id}`).then(r=>r.json());
     if(!data.records?.length){c.innerHTML=`<div class="empty"><div class="et">${item.name||item.id}</div><div class="es">История пуста</div></div>`;return;}
-    renderHist(data, item.color_hex||'#c8ff47');
+    renderHist(data, data.color_hex || item.color_hex || '#c8ff47');
   }catch{c.innerHTML=`<div class="empty"><div class="et">Ошибка</div></div>`;}
 }
 function renderHist(data, itemColor='#c8ff47'){
@@ -694,7 +716,7 @@ function renderHist(data, itemColor='#c8ff47'){
   const labels=data.records.map(r=>{const d=new Date(r.ts);return`${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`;});
   const prices=data.records.map(r=>r.price);
   const med=s.median||0;
-  const ptC=prices.map(p=>{if(!med)return itemColor;const r=p/med;if(r<0.7)return'#4bff9a';if(r<0.9)return'#4ade80';if(r<1.1)return itemColor;if(r<1.3)return'#f97474';return'#fbbf24';});
+  const ptC=prices.map(()=>itemColor);
   S.chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:prices,borderColor:itemColor,backgroundColor:x=>{const g=x.chart.ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,itemColor+'33');g.addColorStop(1,itemColor+'00');return g;},fill:true,borderWidth:1.5,pointRadius:4,pointBackgroundColor:ptC,pointBorderColor:ptC,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2230',borderColor:'#2e3448',borderWidth:1,titleColor:'#7a8099',bodyColor:itemColor,bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:x=>fP(x.parsed.y)}}},scales:{x:{ticks:{color:'#4a5070',font:{size:9},maxRotation:0},grid:{color:'rgba(37,42,56,.8)'}},y:{ticks:{color:'#4a5070',font:{family:'JetBrains Mono',size:9},callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:'rgba(37,42,56,.8)'}}}}}); 
 }
 const debH=deb(loadHist,500);
@@ -705,13 +727,10 @@ $('hq').addEventListener('keydown',e=>{if(e.key==='Enter')loadHist(e.target.valu
 function syncCfg(){
   $('ntf').checked=S.cfg.notif;
   $('iv').textContent=S.cfg.ipp;
-  $('tv').innerHTML=`${S.cfg.thr}<span style="font-size:9px;opacity:.5">%</span>`;
 }
 $('ntf').addEventListener('change',()=>S.cfg.notif=$('ntf').checked);
 $('im').addEventListener('click',()=>{if(S.cfg.ipp>1){S.cfg.ipp--;syncCfg();}});
 $('ip').addEventListener('click',()=>{if(S.cfg.ipp<20){S.cfg.ipp++;syncCfg();}});
-$('tm').addEventListener('click',()=>{if(S.cfg.thr>5){S.cfg.thr-=5;syncCfg();}});
-$('tp').addEventListener('click',()=>{if(S.cfg.thr<50){S.cfg.thr+=5;syncCfg();}});
 
 // ══ ЗАПУСК ══════════════════════════════════════════════════
 buildCatGrid(); syncCfg();
