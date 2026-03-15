@@ -247,19 +247,27 @@ img{display:block}
   <div class="sh" id="ssh">
     <div class="shh"></div><div class="sht">Сортировка</div>
     <div class="shs">
-      <div class="shl" style="margin-top:0">По полю</div>
       <div class="sr" id="sfld">
-        <button class="sc2 on" data-f="price">Цена выкупа</button>
+        <button class="sc2 on" data-f="price">Цена выкупа ↓</button>
         <button class="sc2" data-f="bid">Цена ставки</button>
         <button class="sc2" data-f="time">Время окончания</button>
         <button class="sc2" data-f="amount">Количество</button>
       </div>
     </div>
     <div class="shs">
-      <div class="shl">Направление</div>
-      <div class="sdd">
-        <button class="db on" data-d="asc">↑ По возрастанию</button>
-        <button class="db" data-d="desc">↓ По убыванию</button>
+      <div class="shl">Количество в стаке</div>
+      <div style="display:flex;gap:6px">
+        <input class="si" id="lqf" type="number" placeholder="От" min="1" style="flex:1;margin:0">
+        <input class="si" id="lqt" type="number" placeholder="До" min="1" style="flex:1;margin:0">
+      </div>
+    </div>
+    <div class="shs">
+      <div class="shl">Заточка</div>
+      <div class="ew">
+        <div class="ev" id="lev">Любая</div>
+        <input type="range" class="esl" id="lesl" min="-1" max="15" value="-1" step="1">
+        <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
+        <button class="ecl" id="lecl" style="display:none">Сбросить</button>
       </div>
     </div>
   </div>
@@ -283,22 +291,7 @@ img{display:block}
       <div class="shl" style="margin-top:0">Категория</div>
       <div class="cg" id="cg"></div>
     </div>
-    <div class="shs">
-      <div class="shl">Заточка</div>
-      <div class="ew">
-        <div class="ev" id="ev">Любая</div>
-        <input type="range" class="esl" id="esl" min="-1" max="15" value="-1" step="1">
-        <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
-        <button class="ecl" id="ecl" style="display:none">Сбросить</button>
-      </div>
-    </div>
-    <div class="shs">
-      <div class="shl">Количество в стаке</div>
-      <div style="display:flex;gap:6px">
-        <input class="si" id="qf" type="number" placeholder="От" min="1" style="flex:1;margin:0">
-        <input class="si" id="qt" type="number" placeholder="До" min="1" style="flex:1;margin:0">
-      </div>
-    </div>
+    <!-- Заточка и количество теперь на экране лотов -->
     <button class="fsap" id="fsap">Применить</button>
   </div>
 
@@ -521,8 +514,8 @@ async function loadLots(page=0) {
       p.set('sort', S.sort.f);
       p.set('asc', S.sort.d==='asc');
     }
-    // Фильтр редкости только для артефактов
-    if(S.rarFilter.length && isArtCat(item.category||'')) {
+    // Фильтр редкости / ранга
+    if(S.rarFilter.length) {
       const rarKeys = {white:[0],green:[1],blue:[2],red:[3,4],yellow:[5]};
       const matched = Object.entries(rarKeys).find(([k,v])=>v.some(q=>S.rarFilter.includes(q)));
       if(matched) p.set('rarity', matched[0]);
@@ -620,17 +613,37 @@ document.querySelectorAll('#sfld .sc2').forEach(b=>{
     }else{
       b.classList.add('on');
       b.dataset.state=st;
+      // обновляем стрелку
+      const base = b.textContent.replace(' ↓','').replace(' ↑','');
+      b.textContent = base + (st==='desc'?' ↓':' ↑');
       S.sort={f:field,d:st};
     }
   });
+});
+
+// Количество и заточка для лотов
+const lqf=$('lqf'), lqt=$('lqt'), lesl=$('lesl'), lev=$('lev'), lecl=$('lecl');
+lqf.addEventListener('input',()=>{ S.flt.qf=parseInt(lqf.value)||null; });
+lqt.addEventListener('input',()=>{ S.flt.qt=parseInt(lqt.value)||null; });
+lesl.addEventListener('input',()=>{
+  const v=parseInt(lesl.value);
+  S.flt.enh=v;
+  lev.textContent=v<0?'Любая':`+${v}`;
+  lecl.style.display=v>=0?'block':'none';
+});
+lecl.addEventListener('click',()=>{
+  lesl.value=-1;
+  S.flt.enh=-1;
+  lev.textContent='Любая';
+  lecl.style.display='none';
 });
 
 // ══ ШТОРКА РЕДКОСТИ / РАНГА ════════════════════════════════
 function buildRarList() {
   const rl=$('rlist'); rl.innerHTML='';
   const item=S.item, cat=item?.category||'misc', art=isArtCat(cat);
-  const list = art ? ART : [];
-  $('rsh-title').textContent = 'Редкость артефакта';
+  const list = art ? ART : RNK;
+  $('rsh-title').textContent = art ? 'Редкость артефакта' : 'Ранг предмета';
   list.forEach(r=>{
     const on=r.q.some(qv=>S.rarFilter.includes(qv));
     const el=document.createElement('div'); el.className=`ritem${on?' on':''}`; el.style.color=r.c;
@@ -658,22 +671,14 @@ function buildCatGrid() {
 }
 function openFilter(){
   $('cg').querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.k===S.flt.cat));
-  $('esl').value=S.flt.enh<0?-1:S.flt.enh;
-  $('ev').textContent=S.flt.enh<0?'Любая':`+${S.flt.enh}`;
-  $('ecl').style.display=S.flt.enh>=0?'block':'none';
-  $('qf').value=S.flt.qf||''; $('qt').value=S.flt.qt||'';
   $('fov').classList.add('on'); $('fsh').classList.add('on');
 }
 function closeFilter(){ $('fov').classList.remove('on'); $('fsh').classList.remove('on'); }
 $('fopen').addEventListener('click',openFilter);
 $('fov').addEventListener('click',closeFilter);
 $('fsap').addEventListener('click',()=>{
-  S.flt.qf=parseInt($('qf').value)||null; S.flt.qt=parseInt($('qt').value)||null;
   closeFilter(); searchItems($('sq').value, S.flt.cat);
 });
-const esl=$('esl'), ev=$('ev'), ecl=$('ecl');
-esl.addEventListener('input',()=>{ const v=parseInt(esl.value); S.flt.enh=v; ev.textContent=v<0?'Любая':`+${v}`; ecl.style.display=v>=0?'block':'none'; });
-ecl.addEventListener('click',()=>{ esl.value=-1; S.flt.enh=-1; ev.textContent='Любая'; ecl.style.display='none'; });
 
 // ══ ИЗБРАННОЕ / НЕДАВНИЕ ════════════════════════════════════
 $('cfav').addEventListener('click',()=>{
