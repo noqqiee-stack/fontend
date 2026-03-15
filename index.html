@@ -253,7 +253,6 @@ img{display:block}
         <button class="sc2" data-f="bid">Цена ставки</button>
         <button class="sc2" data-f="time">Время окончания</button>
         <button class="sc2" data-f="amount">Количество</button>
-        <button class="sc2" data-f="quality">Редкость / Ранг</button>
       </div>
     </div>
     <div class="shs">
@@ -321,17 +320,18 @@ const ART = [
   {q:[0], n:'Обычный',        c:'#ffffff'}, // белый
   {q:[1], n:'Необычный',      c:'#4ade80'}, // зелёный
   {q:[2], n:'Особый',         c:'#60a5fa'}, // синий
-  {q:[3], n:'Редкий',         c:'#f97474'}, // красный
+  {q:[3], n:'Редкий',         c:'#f472b6'}, // розовый
   {q:[4], n:'Исключительный', c:'#f97474'}, // красный
   {q:[5], n:'Легендарный',    c:'#fbbf24'}, // жёлтый
 ];
-// Остальные предметы: ранги 0-4
+// Остальные предметы: ранги 0-5
 const RNK = [
   {q:[0],   n:'Отмычка', c:'#ffffff'}, // белый
-  {q:[1],   n:'Сталкер', c:'#4ade80'}, // ближе к «новичек»/зелёный
-  {q:[2],   n:'Ветеран', c:'#60a5fa'}, // синий
-  {q:[3],   n:'Мастер',  c:'#f472b6'}, // розовый / красный
-  {q:[4,5], n:'Легенда', c:'#fbbf24'}, // жёлтый
+  {q:[1],   n:'Новичок', c:'#4ade80'}, // зелёный
+  {q:[2],   n:'Сталкер', c:'#60a5fa'}, // синий
+  {q:[3],   n:'Ветеран', c:'#f472b6'}, // розовый
+  {q:[4],   n:'Мастер',  c:'#f97474'}, // красный
+  {q:[5],   n:'Легенда', c:'#fbbf24'}, // жёлтый
 ];
 
 function getRarInfo(quality, isArt) {
@@ -363,7 +363,7 @@ const CATS = {
 // ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
 const S = {
   flt:    {cat:'', enh:-1, qf:null, qt:null},
-  sort:   {f:'price', d:'desc'}, // по ТЗ: сначала по убыванию
+  sort:   {f:'', d:''}, // три состояния: выключено / по убыванию / по возрастанию
   rarFilter: [],  // выбранные quality numbers для лотов
   prof:   false,
   item:   null,
@@ -427,12 +427,13 @@ function mkItemCard(item) {
   iconWrap.appendChild(mkIcon(icon_path||item.ip||'', id));
   card.appendChild(iconWrap);
   const info=document.createElement('div'); info.className='iinfo';
-  const sub = rarity_name
-    ? `${CATS[cat]||cat} · <span style="color:${color_hex};font-weight:700">${rarity_name}</span>`
-    : (CATS[cat]||cat);
-  // Для артефактов имя всегда окрашиваем в цвет редкости
   const isArt = isArtCat(cat);
-  const titleColor = isArt ? color_hex : color_hex;
+  const sub = isArt
+    ? (CATS[cat]||cat)                  // при поиске артефактов редкость не показываем
+    : (rarity_name
+        ? `${CATS[cat]||cat} · <span style="color:${color_hex};font-weight:700">${rarity_name}</span>`
+        : (CATS[cat]||cat));
+  const titleColor = isArt ? '#e8eaf0' : color_hex; // имя артефакта в списке — обычным цветом
   info.innerHTML=`<div class="iname" style="color:${titleColor}">${name||id}</div><div class="isub">${sub}</div>`;
   card.appendChild(info);
   const star=document.createElement('button'); star.className=`star${fav?' on':''}`; star.textContent='★';
@@ -512,8 +513,9 @@ async function loadLots(page=0) {
     const item=S.item; if(!item) return;
     let lots=[], total=0, pages=1;
     const p=new URLSearchParams({page, per_page:S.cfg.ipp});
-    p.set('q', item.name||item.id);
-    if(item.category)p.set('category',item.category);
+    // Для конкретного предмета всегда работаем по его item_id,
+    // чтобы избежать подмешивания других бронекостюмов и т.п.
+    p.set('item_id', item.id);
     // сортировка: по ТЗ три состояния, но на сервер всё равно отправляем sort/asc
     if(S.sort.f){
       p.set('sort', S.sort.f);
@@ -535,7 +537,7 @@ async function loadLots(page=0) {
     if(!lots.length&&page===0){list.innerHTML=`<div class="empty"><div class="et">Лотов нет</div><div class="es">На аукционе нет активных лотов</div></div>`;}
     else lots.forEach(l=>list.appendChild(mkLotCard(l)));
     more.innerHTML='';
-    if(!S.prof&&page<S.pages-1){
+    if(page<S.pages-1){
       const b=document.createElement('button'); b.className='lm';
       b.textContent=`Ещё (${total-S.lots.length})`; b.onclick=()=>loadLots(page+1);
       more.appendChild(b);
@@ -602,7 +604,8 @@ $('sov').addEventListener('click',()=>{ $('sov').classList.remove('on'); $('ssh'
 document.querySelectorAll('.db').forEach(b=>{ b.style.display='none'; });
 
 document.querySelectorAll('#sfld .sc2').forEach(b=>{
-  b.dataset.state='off';
+  b.dataset.state = b.classList.contains('on') ? 'desc' : 'off';
+  if(b.classList.contains('on')){ S.sort={f:b.dataset.f,d:'desc'}; }
   b.addEventListener('click',()=>{
     const field=b.dataset.f;
     // цикл: off -> desc -> asc -> off
