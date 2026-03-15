@@ -196,11 +196,19 @@ img{display:block}
         </div>
         <div class="lii" id="lii"></div>
         <div class="lctrl">
-          <button class="cb2" id="ropen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
-            <span id="rbtnlbl">Редкость</span>
+          <button class="ctrbtn prof" id="ptog">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Выгодные
           </button>
-          <button class="cb2" id="sopen">
+          <button class="ctrbtn" id="qopen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="qbtn-label">Редкость</span>
+          </button>
+          <div id="enh-inline" style="display:none;align-items:center;gap:4px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;padding:4px 7px">
+            <span style="font-size:10px;font-weight:600;color:var(--t2);white-space:nowrap">Заточка</span>
+            <input id="enh-from" type="number" min="0" max="15" placeholder="от" style="width:36px;height:24px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--tx);font-size:11px;text-align:center;outline:none;padding:0 2px">
+            <span style="font-size:11px;color:var(--t3)">—</span>
+            <input id="enh-to" type="number" min="0" max="15" placeholder="до" style="width:36px;height:24px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--tx);font-size:11px;text-align:center;outline:none;padding:0 2px">
+          </div>
+          <button class="ctrbtn" id="sopen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>Сортировка
           </button>
         </div>
@@ -229,6 +237,7 @@ img{display:block}
       <div class="stl" style="padding-top:10px">
         <div class="srow"><div><div class="snm">Уведомления</div><div class="sds">О новых лотах по последним фильтрам</div></div><label class="tgl"><input type="checkbox" id="ntf"><div class="ttr"></div><div class="tth"></div></label></div>
         <div class="srow"><div><div class="snm">Лотов на страницу</div><div class="sds">Количество лотов за один запрос</div></div><div class="stp"><button class="stpb" id="im">−</button><div class="stpv" id="iv">10</div><button class="stpb" id="ip">+</button></div></div>
+        <div class="srow"><div><div class="snm">Порог выгоды</div><div class="sds">Скидка от медианы для «Выгодных»</div></div><div class="stp"><button class="stpb" id="tm">−</button><div class="stpv" id="tv">20<span style="font-size:9px;opacity:.5">%</span></div><button class="stpb" id="tp">+</button></div></div>
         <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v6.0</span> — STALCRAFT Аукцион · База данных EXBO-Studio</div>
       </div>
     </div>
@@ -247,40 +256,30 @@ img{display:block}
   <div class="sh" id="ssh">
     <div class="shh"></div><div class="sht">Сортировка</div>
     <div class="shs">
-      <div class="sr" id="sfld">
-        <button class="sc2 on" data-f="price">Цена выкупа ↓</button>
+      <div class="sr" id="sfld" style="margin-top:4px">
+        <button class="sc2 on" data-f="price">Цена выкупа</button>
         <button class="sc2" data-f="bid">Цена ставки</button>
         <button class="sc2" data-f="time">Время окончания</button>
-        <button class="sc2" data-f="amount">Количество</button>
+        <button class="sc2 sort-amount" data-f="amount">Количество</button>
+        <button class="sc2" data-f="quality">Редкость / Ранг</button>
       </div>
     </div>
     <div class="shs">
-      <div class="shl">Параметры лота</div>
-      <div class="ew">
-        <div class="ev" id="lev">Заточка: Любая</div>
-        <input type="range" class="esl" id="lesl" min="-1" max="15" value="-1" step="1">
-        <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
-        <button class="ecl" id="lecl" style="display:none">Сбросить заточку</button>
-      </div>
-      <div style="margin-top:10px">
-        <div class="shl" style="margin-top:0">Изученность</div>
-        <div class="sr" id="lsr">
-          <button class="sc2" data-s="any">Любые</button>
-          <button class="sc2" data-s="studied">Только изученные</button>
-          <button class="sc2" data-s="unstudied">Только не изученные</button>
-        </div>
+      <div class="sdd">
+        <button class="db on" data-d="asc">↑ По возрастанию</button>
+        <button class="db" data-d="desc">↓ По убыванию</button>
       </div>
     </div>
   </div>
 
   <!-- ШТОРКА РЕДКОСТИ / РАНГА -->
-  <div class="ov" id="rov"></div>
-  <div class="sh" id="rsh">
+  <div class="ov" id="qov"></div>
+  <div class="sh" id="qsh">
     <div class="shh"></div>
-    <div class="sht" id="rsh-title">Редкость</div>
+    <div class="sht" id="qsh-title">Редкость</div>
     <div class="shs">
       <div class="rlist" id="rlist"></div>
-      <button class="fsap" style="margin-top:10px" id="rap">Применить</button>
+      <button class="fsap" style="margin-top:10px" id="qap">Применить</button>
     </div>
   </div>
 
@@ -292,7 +291,22 @@ img{display:block}
       <div class="shl" style="margin-top:0">Категория</div>
       <div class="cg" id="cg"></div>
     </div>
-    <!-- Заточка и количество теперь на экране лотов -->
+    <div class="shs">
+      <div class="shl">Заточка</div>
+      <div class="ew">
+        <div class="ev" id="ev">Любая</div>
+        <input type="range" class="esl" id="esl" min="-1" max="15" value="-1" step="1">
+        <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
+        <button class="ecl" id="ecl" style="display:none">Сбросить</button>
+      </div>
+    </div>
+    <div class="shs">
+      <div class="shl">Количество в стаке</div>
+      <div style="display:flex;gap:6px">
+        <input class="si" id="qf" type="number" placeholder="От" min="1" style="flex:1;margin:0">
+        <input class="si" id="qt" type="number" placeholder="До" min="1" style="flex:1;margin:0">
+      </div>
+    </div>
     <button class="fsap" id="fsap">Применить</button>
   </div>
 
@@ -301,7 +315,7 @@ img{display:block}
 
 <script>
 // ══ КОНФИГ ══════════════════════════════════════════════════
-const BACKEND  = 'https://backend-seven-topaz-14.vercel.app';
+const BACKEND  = 'https://YOUR_SERVER_URL';
 const GH_RAW   = 'https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main';
 const iconURL  = p => p ? `${GH_RAW}/${p}` : '';
 
@@ -311,21 +325,20 @@ if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0a0b0d');tg.setBackgroundColor
 // ══ ЦВЕТА И РЕДКОСТИ ════════════════════════════════════════
 // Артефакты: quality 0-5
 const ART = [
-  {q:[0], n:'Обычный',        c:'#ffffff'}, // белый
-  {q:[1], n:'Необычный',      c:'#4ade80'}, // зелёный
-  {q:[2], n:'Особый',         c:'#60a5fa'}, // синий
-  {q:[3], n:'Редкий',         c:'#f472b6'}, // розовый
-  {q:[4], n:'Исключительный', c:'#f97474'}, // красный
-  {q:[5], n:'Легендарный',    c:'#fbbf24'}, // жёлтый
+  {q:[0], n:'Обычный',        c:'#9ca3af'},
+  {q:[1], n:'Необычный',      c:'#4ade80'},
+  {q:[2], n:'Особый',         c:'#60a5fa'},
+  {q:[3], n:'Редкий',         c:'#c084fc'},
+  {q:[4], n:'Исключительный', c:'#f97474'},
+  {q:[5], n:'Легендарный',    c:'#fbbf24'},
 ];
-// Остальные предметы: ранги 0-5
+// Предметы: rank quality 0-4
 const RNK = [
-  {q:[0],   n:'Отмычка', c:'#ffffff'}, // белый
-  {q:[1],   n:'Новичок', c:'#4ade80'}, // зелёный
-  {q:[2],   n:'Сталкер', c:'#60a5fa'}, // синий
-  {q:[3],   n:'Ветеран', c:'#f472b6'}, // розовый
-  {q:[4],   n:'Мастер',  c:'#f97474'}, // красный
-  {q:[5],   n:'Легенда', c:'#fbbf24'}, // жёлтый
+  {q:[0], n:'Отмычка', c:'#9ca3af'},
+  {q:[1], n:'Сталкер', c:'#60a5fa'},
+  {q:[2], n:'Ветеран',  c:'#f472b6'},
+  {q:[3], n:'Мастер',   c:'#f97474'},
+  {q:[4,5], n:'Легенда',c:'#fbbf24'},
 ];
 
 function getRarInfo(quality, isArt) {
@@ -356,13 +369,15 @@ const CATS = {
 
 // ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
 const S = {
-  flt:    {cat:'', enh:-1, qf:null, qt:null, studied:null},
-  sort:   {f:'', d:''}, // три состояния: выключено / по убыванию / по возрастанию
-  rarFilter: [],  // выбранные quality numbers для лотов
+  flt:    {cat:'', enh:-1, qf:null, qt:null},
+  sort:   {f:'price', d:'asc'},
+  qFilter: [],   // выбранные quality numbers для фильтра лотов
+  enhFrom: null, // заточка от
+  enhTo:   null, // заточка до
   prof:   false,
   item:   null,
   lots:[], total:0, page:0, pages:1, loading:false,
-  cfg:    {notif:false, ipp:10},
+  cfg:    {notif:false, ipp:10, thr:20},
   chart:  null, favMode:false, recMode:false,
 };
 
@@ -415,20 +430,21 @@ function mkPH(id,sz,extraCls='') {
 // ══ КАРТОЧКА ПРЕДМЕТА ═══════════════════════════════════════
 function mkItemCard(item) {
   const {id, name, category:cat='misc', icon_path='', color_hex='#9ca3af', rarity_name=''} = item;
+  const art = isArtCat(cat);
   const fav = isFav(id);
+  // Для артефактов — нейтральный цвет, без редкости (она только в лотах)
+  const displayColor = art ? '#7a8099' : color_hex;
+  const displayRarity = art ? '' : rarity_name;
+
   const card = document.createElement('div'); card.className='ic';
   const iconWrap=document.createElement('div'); iconWrap.style.flexShrink='0';
   iconWrap.appendChild(mkIcon(icon_path||item.ip||'', id));
   card.appendChild(iconWrap);
   const info=document.createElement('div'); info.className='iinfo';
-  const isArt = isArtCat(cat);
-  const sub = isArt
-    ? (CATS[cat]||cat)                  // при поиске артефактов редкость не показываем
-    : (rarity_name
-        ? `${CATS[cat]||cat} · <span style="color:${color_hex};font-weight:700">${rarity_name}</span>`
-        : (CATS[cat]||cat));
-  const titleColor = isArt ? '#e8eaf0' : color_hex; // имя артефакта в списке — обычным цветом
-  info.innerHTML=`<div class="iname" style="color:${titleColor}">${name||id}</div><div class="isub">${sub}</div>`;
+  const sub = displayRarity
+    ? `${CATS[cat]||cat} · <span style="color:${displayColor};font-weight:700">${displayRarity}</span>`
+    : (CATS[cat]||cat);
+  info.innerHTML=`<div class="iname" style="color:${displayColor}">${name||id}</div><div class="isub">${sub}</div>`;
   card.appendChild(info);
   const star=document.createElement('button'); star.className=`star${fav?' on':''}`; star.textContent='★';
   star.addEventListener('click',e=>{e.stopPropagation();togFav(id);star.classList.toggle('on',isFav(id));});
@@ -468,8 +484,11 @@ async function searchItems(q='', cat='', favList=null, recList=null) {
 
 // ══ ОТКРЫТИЕ ЛОТОВ ══════════════════════════════════════════
 async function openLots(item) {
-  S.item=item; S.page=0; S.lots=[]; S.rarFilter=[];
-  $('ropen').classList.remove('on');
+  S.item=item; S.page=0; S.lots=[]; S.prof=false; S.qFilter=[];
+  S.enhFrom=null; S.enhTo=null;
+  $('ptog').classList.remove('on');
+  $('qopen').classList.remove('on');
+  $('enh-from').value=''; $('enh-to').value='';
   addRec(item.id, item.name||item.id, item.category||'misc', item.cat_path||'', item.icon_path||'');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -478,22 +497,25 @@ async function openLots(item) {
   const cat=item.category||'misc';
   const art=isArtCat(cat);
   const clr=item.color_hex||'#9ca3af';
-  const rname=item.rarity_name||'';
+  // В шапке лотов редкость не показываем (она фильтруется в лотах)
+  const rname='';
 
-  // Редкость оставляем только для артефактов, ранговой фильтрации не делаем
-  if(art){
-    $('ropen').style.display='inline-flex';
-    $('rbtnlbl').textContent='Редкость';
-  }else{
-    $('ropen').style.display='none';
-    S.rarFilter=[];
-  }
+  // Кнопка редкости/ранга
+  $('qbtn-label').textContent = art ? 'Редкость' : 'Ранг';
+
+  // Показываем блок заточки
+  $('enh-inline').style.display='flex';
+
+  // Скрываем "Количество" в сортировке для артефактов
+  document.querySelectorAll('.sort-amount').forEach(b => {
+    b.style.display = art ? 'none' : '';
+  });
 
   const lii=$('lii'); lii.innerHTML='';
   lii.appendChild(mkIcon(item.icon_path||'', item.id, 44));
   const txt=document.createElement('div');
   txt.innerHTML=`<div class="lin" style="color:${clr}">${item.name||item.id}</div>
-    <div class="lct">${CATS[cat]||cat}${rname?' · <span style="color:'+clr+'">'+rname+'</span>':''}</div>`;
+    <div class="lct">${CATS[cat]||cat}</div>`;
   lii.appendChild(txt);
   await loadLots(0);
 }
@@ -506,37 +528,40 @@ async function loadLots(page=0) {
   try {
     const item=S.item; if(!item) return;
     let lots=[], total=0, pages=1;
-    const p=new URLSearchParams({page, per_page:S.cfg.ipp});
-    // Для конкретного предмета всегда работаем по его item_id,
-    // чтобы избежать подмешивания других бронекостюмов и т.п.
-    p.set('item_id', item.id);
-    // сортировка: по ТЗ три состояния, но на сервер всё равно отправляем sort/asc
-    if(S.sort.f){
-      p.set('sort', S.sort.f);
-      p.set('asc', S.sort.d==='asc');
+    if(S.prof) {
+      const p=new URLSearchParams({q:item.name||item.id, threshold:((100-S.cfg.thr)/100).toFixed(2)});
+      if(item.category)p.set('category',item.category);
+      const d=await fetch(`${BACKEND}/api/profitable?${p}`).then(r=>r.json());
+      lots=d.lots||[]; total=lots.length; pages=1;
+    } else {
+      const p=new URLSearchParams({sort:S.sort.f, asc:S.sort.d==='asc', page, per_page:S.cfg.ipp});
+      p.set('q', item.name||item.id);
+      if(item.category)p.set('category',item.category);
+      if(S.qFilter.length) p.set('quality_values', S.qFilter.join(','));
+      // Заточка: если от и до — фильтруем на фронте после получения
+      if(S.enhTo!==null&&S.enhTo>=0) p.set('enhancement', S.enhTo);
+      else if(S.enhFrom!==null&&S.enhFrom>=0) p.set('enhancement', S.enhFrom);
+      if(S.flt.qf)p.set('qty_from',S.flt.qf); if(S.flt.qt)p.set('qty_to',S.flt.qt);
+      const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
+      lots=d.lots||[];
+      // Фильтр заточки по диапазону на фронте
+      if(S.enhFrom!==null||S.enhTo!==null) {
+        lots=lots.filter(l=>{
+          const e=(l._enh)??(l.additional?.potentialLevel??0);
+          if(S.enhFrom!==null&&e<S.enhFrom) return false;
+          if(S.enhTo!==null&&e>S.enhTo) return false;
+          return true;
+        });
+      }
+      total=d.total||0; pages=d.pages||1;
+      S.total=total; S.pages=pages;
     }
-    // Фильтр редкости / ранга
-    if(S.rarFilter.length) {
-      const rarKeys = {white:[0],green:[1],blue:[2],red:[3,4],yellow:[5]};
-      const matched = Object.entries(rarKeys).find(([k,v])=>v.some(q=>S.rarFilter.includes(q)));
-      if(matched) p.set('rarity', matched[0]);
-    }
-    if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
-    if(S.flt.studied!==null)p.set('studied',S.flt.studied);
-    // Количество в стаке не фильтруем для артефактов, но оставляем возможность для обычных предметов
-    if(!isArtCat(item.category||'')){
-      if(S.flt.qf)p.set('qty_from',S.flt.qf);
-      if(S.flt.qt)p.set('qty_to',S.flt.qt);
-    }
-    const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
-    lots=d.lots||[]; total=d.total||0; pages=d.pages||1;
-    S.total=total; S.pages=pages;
     if(page===0) list.innerHTML='';
     S.lots=page===0?lots:[...S.lots,...lots];
     if(!lots.length&&page===0){list.innerHTML=`<div class="empty"><div class="et">Лотов нет</div><div class="es">На аукционе нет активных лотов</div></div>`;}
     else lots.forEach(l=>list.appendChild(mkLotCard(l)));
     more.innerHTML='';
-    if(page<S.pages-1){
+    if(!S.prof&&page<S.pages-1){
       const b=document.createElement('button'); b.className='lm';
       b.textContent=`Ещё (${total-S.lots.length})`; b.onclick=()=>loadLots(page+1);
       more.appendChild(b);
@@ -559,14 +584,13 @@ function mkLotCard(lot) {
   const price=lot.buyoutPrice||lot.startPrice||0;
   const bid=lot.startPrice||0;
   const amt=lot.amount||1;
-  // Для артефактов не показываем "количество в стаке" и цену за штуку
-  const pu=!art ? (lot._perUnit||(amt>1&&price?Math.floor(price/amt):null)) : null;
+  const pu=lot._perUnit||(amt>1&&price?Math.floor(price/amt):null);
   const time=lot._timeLeft||fT(lot.endTime);
   const name=lot._name||item?.name||item?.id||'—';
   const urg=time.includes('м')&&parseInt(time)<15;
   const studied=lot._studied??add.isResearched??add.researched??null;
   const card=document.createElement('div'); card.className='lc';
-  let discH='';
+  let discH=lot._discount?`<div class="ldsc">−${lot._discount}%</div>`:'';
   let studH=art&&studied!==null?(studied?`<span class="bg bg-ok">Изучен</span>`:`<span class="bg bg-q">Не изучен</span>`):'';
   card.innerHTML=`<div class="lbar" style="background:${clr}"></div>
   <div class="lbody">
@@ -574,7 +598,7 @@ function mkLotCard(lot) {
     <div class="lbgs">
       <span class="bg bg-r" style="color:${clr};border-color:${clr}44">${rname}</span>
       ${enh>0?`<span class="bg bg-e">+${enh}</span>`:''}
-      ${(!art && amt>1)?`<span class="bg bg-q">×${amt}</span>`:''}
+      ${amt>1?`<span class="bg bg-q">×${amt}</span>`:''}
       ${studH}
     </div>
     <div class="lpr">
@@ -587,7 +611,8 @@ function mkLotCard(lot) {
   return card;
 }
 
-// ══ НАЗАД ═══════════════════════════════════════════════════
+// ══ ВЫГОДНЫЕ / НАЗАД ════════════════════════════════════════
+$('ptog').addEventListener('click',()=>{ S.prof=!S.prof; $('ptog').classList.toggle('on',S.prof); loadLots(0); });
 $('lbk').addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
@@ -596,91 +621,37 @@ $('lbk').addEventListener('click',()=>{
   $('cnt').scrollTop=0;
 });
 
-// ══ СОРТИРОВКА (три состояния) ══════════════════════════════
+// ══ СОРТИРОВКА ══════════════════════════════════════════════
 $('sopen').addEventListener('click',()=>{ $('sov').classList.add('on'); $('ssh').classList.add('on'); });
 $('sov').addEventListener('click',()=>{ $('sov').classList.remove('on'); $('ssh').classList.remove('on'); loadLots(0); });
-
-// убираем отдельный выбор направления – всё в одной кнопке
-document.querySelectorAll('.db').forEach(b=>{ b.style.display='none'; });
-
-document.querySelectorAll('#sfld .sc2').forEach(b=>{
-  b.dataset.state = b.classList.contains('on') ? 'desc' : 'off';
-  if(b.classList.contains('on')){ S.sort={f:b.dataset.f,d:'desc'}; }
-  b.addEventListener('click',()=>{
-    const field=b.dataset.f;
-    // цикл: off -> desc -> asc -> off
-    let st=b.dataset.state||'off';
-    if(st==='off') st='desc';
-    else if(st==='desc') st='asc';
-    else st='off';
-    // сбрасываем все остальные
-    document.querySelectorAll('#sfld .sc2').forEach(x=>{ x.classList.remove('on'); x.dataset.state='off'; });
-    if(st==='off'){
-      S.sort={f:'',d:''};
-    }else{
-      b.classList.add('on');
-      b.dataset.state=st;
-      // обновляем стрелку
-      const base = b.textContent.replace(' ↓','').replace(' ↑','');
-      b.textContent = base + (st==='desc'?' ↓':' ↑');
-      S.sort={f:field,d:st};
-    }
-  });
-});
-
-// Заточка и "изучен" для лотов
-const lesl=$('lesl'), lev=$('lev'), lecl=$('lecl');
-lesl.addEventListener('input',()=>{
-  const v=parseInt(lesl.value);
-  S.flt.enh=v;
-  lev.textContent=v<0?'Заточка: Любая':`Заточка: +${v}`;
-  lecl.style.display=v>=0?'block':'none';
-});
-lecl.addEventListener('click',()=>{
-  lesl.value=-1;
-  S.flt.enh=-1;
-  lev.textContent='Заточка: Любая';
-  lecl.style.display='none';
-});
-
-// Изучен / не изучен
-const lsr=$('lsr');
-if(lsr){
-  lsr.querySelectorAll('.sc2').forEach(b=>{
-    b.addEventListener('click',()=>{
-      lsr.querySelectorAll('.sc2').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');
-      const mode=b.dataset.s;
-      if(mode==='studied') S.flt.studied=true;
-      else if(mode==='unstudied') S.flt.studied=false;
-      else S.flt.studied=null;
-    });
-  });
-  // по умолчанию "Любые"
-  lsr.querySelector('[data-s="any"]').classList.add('on');
-}
+document.querySelectorAll('#sfld .sc2').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('#sfld .sc2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.f=b.dataset.f; }); });
+document.querySelectorAll('.db').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('.db').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.d=b.dataset.d; }); });
 
 // ══ ШТОРКА РЕДКОСТИ / РАНГА ════════════════════════════════
 function buildRarList() {
   const rl=$('rlist'); rl.innerHTML='';
   const item=S.item, cat=item?.category||'misc', art=isArtCat(cat);
   const list = art ? ART : RNK;
-  $('rsh-title').textContent = art ? 'Редкость артефакта' : 'Ранг предмета';
+  document.getElementById('qsh-title').textContent = art ? 'Редкость артефакта' : 'Ранг предмета';
   list.forEach(r=>{
-    const on=r.q.some(qv=>S.rarFilter.includes(qv));
+    const on=r.q.some(qv=>S.qFilter.includes(qv));
     const el=document.createElement('div'); el.className=`ritem${on?' on':''}`; el.style.color=r.c;
     el.innerHTML=`<div class="rchk"><svg class="rchi" viewBox="0 0 10 10" fill="none"><polyline points="1.5 5 4 7.5 8.5 2.5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>${r.n}</span>`;
     el.addEventListener('click',()=>{
-      r.q.forEach(qv=>{ const idx=S.rarFilter.indexOf(qv); idx>=0?S.rarFilter.splice(idx,1):S.rarFilter.push(qv); });
-      el.classList.toggle('on',r.q.some(qv=>S.rarFilter.includes(qv)));
-      $('ropen').classList.toggle('on',S.rarFilter.length>0);
+      r.q.forEach(qv=>{ const idx=S.qFilter.indexOf(qv); idx>=0?S.qFilter.splice(idx,1):S.qFilter.push(qv); });
+      el.classList.toggle('on',r.q.some(qv=>S.qFilter.includes(qv)));
+      $('qopen').classList.toggle('on',S.qFilter.length>0);
     });
     rl.appendChild(el);
   });
 }
-$('ropen').addEventListener('click',()=>{ buildRarList(); $('rov').classList.add('on'); $('rsh').classList.add('on'); });
-$('rov').addEventListener('click',()=>{ $('rov').classList.remove('on'); $('rsh').classList.remove('on'); });
-$('rap').addEventListener('click',()=>{ $('rov').classList.remove('on'); $('rsh').classList.remove('on'); loadLots(0); });
+$('qopen').addEventListener('click',()=>{ buildRarList(); $('qov').classList.add('on'); $('qsh').classList.add('on'); });
+$('qov').addEventListener('click',()=>{ $('qov').classList.remove('on'); $('qsh').classList.remove('on'); });
+$('qap').addEventListener('click',()=>{ $('qov').classList.remove('on'); $('qsh').classList.remove('on'); loadLots(0); });
+
+// Заточка inline
+$('enh-from').addEventListener('change',()=>{ S.enhFrom=parseInt($('enh-from').value)||null; loadLots(0); });
+$('enh-to').addEventListener('change',()=>{ S.enhTo=parseInt($('enh-to').value)||null; loadLots(0); });
 
 // ══ ФИЛЬТРЫ ПОИСКА ═══════════════════════════════════════════
 function buildCatGrid() {
@@ -693,14 +664,22 @@ function buildCatGrid() {
 }
 function openFilter(){
   $('cg').querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.k===S.flt.cat));
+  $('esl').value=S.flt.enh<0?-1:S.flt.enh;
+  $('ev').textContent=S.flt.enh<0?'Любая':`+${S.flt.enh}`;
+  $('ecl').style.display=S.flt.enh>=0?'block':'none';
+  $('qf').value=S.flt.qf||''; $('qt').value=S.flt.qt||'';
   $('fov').classList.add('on'); $('fsh').classList.add('on');
 }
 function closeFilter(){ $('fov').classList.remove('on'); $('fsh').classList.remove('on'); }
 $('fopen').addEventListener('click',openFilter);
 $('fov').addEventListener('click',closeFilter);
 $('fsap').addEventListener('click',()=>{
+  S.flt.qf=parseInt($('qf').value)||null; S.flt.qt=parseInt($('qt').value)||null;
   closeFilter(); searchItems($('sq').value, S.flt.cat);
 });
+const esl=$('esl'), ev=$('ev'), ecl=$('ecl');
+esl.addEventListener('input',()=>{ const v=parseInt(esl.value); S.flt.enh=v; ev.textContent=v<0?'Любая':`+${v}`; ecl.style.display=v>=0?'block':'none'; });
+ecl.addEventListener('click',()=>{ esl.value=-1; S.flt.enh=-1; ev.textContent='Любая'; ecl.style.display='none'; });
 
 // ══ ИЗБРАННОЕ / НЕДАВНИЕ ════════════════════════════════════
 $('cfav').addEventListener('click',()=>{
@@ -728,7 +707,7 @@ async function loadHist(q){
     const item=items[0];
     const data=await fetch(`${BACKEND}/api/history/${item.id}`).then(r=>r.json());
     if(!data.records?.length){c.innerHTML=`<div class="empty"><div class="et">${item.name||item.id}</div><div class="es">История пуста</div></div>`;return;}
-    renderHist(data, data.color_hex || item.color_hex || '#c8ff47');
+    renderHist(data, item.color_hex||'#c8ff47');
   }catch{c.innerHTML=`<div class="empty"><div class="et">Ошибка</div></div>`;}
 }
 function renderHist(data, itemColor='#c8ff47'){
@@ -746,7 +725,7 @@ function renderHist(data, itemColor='#c8ff47'){
   const labels=data.records.map(r=>{const d=new Date(r.ts);return`${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`;});
   const prices=data.records.map(r=>r.price);
   const med=s.median||0;
-  const ptC=prices.map(()=>itemColor);
+  const ptC=prices.map(p=>{if(!med)return itemColor;const r=p/med;if(r<0.7)return'#4bff9a';if(r<0.9)return'#4ade80';if(r<1.1)return itemColor;if(r<1.3)return'#f97474';return'#fbbf24';});
   S.chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:prices,borderColor:itemColor,backgroundColor:x=>{const g=x.chart.ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,itemColor+'33');g.addColorStop(1,itemColor+'00');return g;},fill:true,borderWidth:1.5,pointRadius:4,pointBackgroundColor:ptC,pointBorderColor:ptC,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2230',borderColor:'#2e3448',borderWidth:1,titleColor:'#7a8099',bodyColor:itemColor,bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:x=>fP(x.parsed.y)}}},scales:{x:{ticks:{color:'#4a5070',font:{size:9},maxRotation:0},grid:{color:'rgba(37,42,56,.8)'}},y:{ticks:{color:'#4a5070',font:{family:'JetBrains Mono',size:9},callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:'rgba(37,42,56,.8)'}}}}}); 
 }
 const debH=deb(loadHist,500);
@@ -757,10 +736,13 @@ $('hq').addEventListener('keydown',e=>{if(e.key==='Enter')loadHist(e.target.valu
 function syncCfg(){
   $('ntf').checked=S.cfg.notif;
   $('iv').textContent=S.cfg.ipp;
+  $('tv').innerHTML=`${S.cfg.thr}<span style="font-size:9px;opacity:.5">%</span>`;
 }
 $('ntf').addEventListener('change',()=>S.cfg.notif=$('ntf').checked);
 $('im').addEventListener('click',()=>{if(S.cfg.ipp>1){S.cfg.ipp--;syncCfg();}});
 $('ip').addEventListener('click',()=>{if(S.cfg.ipp<20){S.cfg.ipp++;syncCfg();}});
+$('tm').addEventListener('click',()=>{if(S.cfg.thr>5){S.cfg.thr-=5;syncCfg();}});
+$('tp').addEventListener('click',()=>{if(S.cfg.thr<50){S.cfg.thr+=5;syncCfg();}});
 
 // ══ ЗАПУСК ══════════════════════════════════════════════════
 buildCatGrid(); syncCfg();
