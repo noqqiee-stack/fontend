@@ -21,10 +21,6 @@ img{display:block}
   --tx:#e8eaf0;--t2:#7a8099;--t3:#4a5070;
   --danger:#ff4b4b;--ok:#4bff9a;
   --nav-h:56px;--sb:env(safe-area-inset-bottom,0px);
-  /* Artifact quality colors */
-  --qc0:#9ca3af;--qc1:#4ade80;--qc2:#60a5fa;--qc3:#c084fc;--qc4:#f97474;--qc5:#fbbf24;
-  /* Item rank colors */
-  --rc0:#9ca3af;--rc1:#4ade80;--rc2:#60a5fa;--rc3:#f97474;--rc4:#fbbf24;
 }
 #app{position:fixed;inset:0;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;overflow:hidden}
 #cnt{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+var(--sb)+4px)}
@@ -68,12 +64,11 @@ img{display:block}
 .liimg{width:44px;height:44px;border-radius:7px;background:var(--bg2);object-fit:contain;border:1px solid var(--brd)}
 .lin{font-size:17px;font-weight:700;line-height:1.2}
 .lct{font-size:11px;color:var(--t3);margin-top:2px}
-/* Controls row */
 .lctrl{display:flex;gap:5px;flex-wrap:wrap}
-.ctrbtn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s;white-space:nowrap}
-.ctrbtn svg{width:11px;height:11px}
-.ctrbtn.on{border-color:var(--ac);color:var(--ac)}
-.ctrbtn.prof.on{border-color:var(--ok);color:var(--ok);background:rgba(75,255,154,.08)}
+.cb2{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s;white-space:nowrap}
+.cb2 svg{width:11px;height:11px}
+.cb2.on{border-color:var(--ac);color:var(--ac)}
+.cb2.prof.on{border-color:var(--ok);color:var(--ok);background:rgba(75,255,154,.08)}
 /* LOT CARD */
 .ll{padding:6px 10px 0}
 .lc{display:flex;overflow:hidden;background:var(--bg1);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;animation:fi .18s ease both}
@@ -109,7 +104,7 @@ img{display:block}
 .sdd{display:flex;gap:6px;padding:4px 0}
 .db{flex:1;padding:8px;background:var(--bg2);border:1px solid var(--brd);border-radius:5px;text-align:center;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
 .db.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
-/* Rarity sheet - column list */
+/* Rarity/Rank list — column with checkboxes */
 .rlist{display:flex;flex-direction:column;gap:4px;padding:4px 0}
 .ritem{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid transparent;border-radius:6px;cursor:pointer;transition:all .12s;font-size:13px;font-weight:600}
 .ritem.on{border-color:currentColor;background:color-mix(in srgb,currentColor 10%,transparent)}
@@ -121,7 +116,7 @@ img{display:block}
 .cg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .cb{padding:7px 3px;background:var(--bg2);border:1px solid var(--brd);border-radius:5px;text-align:center;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
 .cb.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
-/* Enh */
+/* Enh slider */
 .ew{padding:2px 0 8px}
 .ev{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--ac);text-align:center;margin-bottom:6px}
 .esl{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:var(--bg3);border-radius:2px;outline:none}
@@ -171,7 +166,7 @@ img{display:block}
 <div id="app">
   <div id="cnt">
 
-    <!-- ПОИСК -->
+    <!-- ПОИСК ПРЕДМЕТОВ -->
     <div id="view-search" class="view active">
       <div class="vh">
         <div class="vt">STALCRAFT — Аукцион</div>
@@ -192,19 +187,23 @@ img{display:block}
       <div id="ilist" class="il"></div>
     </div>
 
-    <!-- ЛОТЫ -->
+    <!-- ЛОТЫ ПРЕДМЕТА -->
     <div id="view-lots" class="view">
       <div class="lh">
-        <div class="lbk" id="lbk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg><span>Назад к поиску</span></div>
+        <div class="lbk" id="lbk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          <span>Назад к поиску</span>
+        </div>
         <div class="lii" id="lii"></div>
         <div class="lctrl">
-          <button class="ctrbtn prof" id="ptog">
+          <button class="cb2 prof" id="ptog">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Выгодные
           </button>
-          <button class="ctrbtn" id="ropen" style="display:none">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Редкость
+          <button class="cb2" id="ropen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
+            <span id="rbtnlbl">Редкость</span>
           </button>
-          <button class="ctrbtn" id="sopen">
+          <button class="cb2" id="sopen">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>Сортировка
           </button>
         </div>
@@ -213,7 +212,7 @@ img{display:block}
       <div id="lmore"></div>
     </div>
 
-    <!-- ИСТОРИЯ -->
+    <!-- ИСТОРИЯ ПРОДАЖ -->
     <div id="view-history" class="view">
       <div class="vh">
         <div class="vt">История продаж</div>
@@ -233,21 +232,21 @@ img{display:block}
       <div class="stl" style="padding-top:10px">
         <div class="srow"><div><div class="snm">Уведомления</div><div class="sds">О новых лотах по последним фильтрам</div></div><label class="tgl"><input type="checkbox" id="ntf"><div class="ttr"></div><div class="tth"></div></label></div>
         <div class="srow"><div><div class="snm">Лотов на страницу</div><div class="sds">Количество лотов за один запрос</div></div><div class="stp"><button class="stpb" id="im">−</button><div class="stpv" id="iv">10</div><button class="stpb" id="ip">+</button></div></div>
-        <div class="srow"><div><div class="snm">Порог выгоды</div><div class="sds">Скидка от медианы цен</div></div><div class="stp"><button class="stpb" id="tm">−</button><div class="stpv" id="tv">20<span style="font-size:9px;opacity:.5">%</span></div><button class="stpb" id="tp">+</button></div></div>
-        <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v5.0</span> — STALCRAFT Аукцион Мини-приложение</div>
+        <div class="srow"><div><div class="snm">Порог выгоды</div><div class="sds">Скидка от медианы для «Выгодных»</div></div><div class="stp"><button class="stpb" id="tm">−</button><div class="stpv" id="tv">20<span style="font-size:9px;opacity:.5">%</span></div><button class="stpb" id="tp">+</button></div></div>
+        <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v6.0</span> — STALCRAFT Аукцион · База данных EXBO-Studio</div>
       </div>
     </div>
 
   </div>
 
-  <!-- ПАНЕЛЬ НАВИГАЦИИ -->
+  <!-- НАВИГАЦИЯ -->
   <div id="nav">
     <button class="nb on" data-v="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span>Поиск</span></button>
     <button class="nb" data-v="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>История</span></button>
     <button class="nb" data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Настройки</span></button>
   </div>
 
-  <!-- СОРТИРОВКА -->
+  <!-- ШТОРКА СОРТИРОВКИ -->
   <div class="ov" id="sov"></div>
   <div class="sh" id="ssh">
     <div class="shh"></div><div class="sht">Сортировка</div>
@@ -258,7 +257,7 @@ img{display:block}
         <button class="sc2" data-f="bid">Цена ставки</button>
         <button class="sc2" data-f="time">Время окончания</button>
         <button class="sc2" data-f="amount">Количество</button>
-        <button class="sc2" data-f="quality">Редкость</button>
+        <button class="sc2" data-f="quality">Редкость / Ранг</button>
       </div>
     </div>
     <div class="shs">
@@ -270,22 +269,21 @@ img{display:block}
     </div>
   </div>
 
-  <!-- РЕДКОСТЬ (только для артефактов) -->
+  <!-- ШТОРКА РЕДКОСТИ / РАНГА -->
   <div class="ov" id="rov"></div>
   <div class="sh" id="rsh">
-    <div class="shh"></div><div class="sht">Редкость артефакта</div>
+    <div class="shh"></div>
+    <div class="sht" id="rsh-title">Редкость</div>
     <div class="shs">
-      <div class="rlist" id="rlist">
-        <!-- Filled by JS -->
-      </div>
+      <div class="rlist" id="rlist"></div>
       <button class="fsap" style="margin-top:10px" id="rap">Применить</button>
     </div>
   </div>
 
-  <!-- ФИЛЬТРЫ (поиск предметов) -->
+  <!-- ШТОРКА ФИЛЬТРОВ (поиск предметов) -->
   <div class="ov" id="fov"></div>
   <div class="sh" id="fsh">
-    <div class="shh"></div><div class="sht">Фильтры</div>
+    <div class="shh"></div><div class="sht">Фильтры поиска</div>
     <div class="shs">
       <div class="shl" style="margin-top:0">Категория</div>
       <div class="cg" id="cg"></div>
@@ -314,128 +312,111 @@ img{display:block}
 
 <script>
 // ══ КОНФИГ ══════════════════════════════════════════════════
-const BACKEND = 'https://backend-seven-topaz-14.vercel.app';
-const GITHUB_RAW = 'https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main';
-const ICON_URL = (icon_path) => icon_path ? `${GITHUB_RAW}/${icon_path}` : '';
+const BACKEND  = 'https://backend-seven-topaz-14.vercel.app';
+const GH_RAW   = 'https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main';
+const iconURL  = p => p ? `${GH_RAW}/${p}` : '';
 
 const tg = window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0a0b0d');tg.setBackgroundColor('#0a0b0d');}
 
-// ══ СИСТЕМА ЦВЕТОВ ══════════════════════════════════════════
-// color строка из базы данных → {display_name, hex_color, quality_index}
-const COLOR_MAP = {
-  // Артефакты
-  'ARTEFACT_COMMON':     {n:'Обычный',        c:'#9ca3af', q:0, art:true},
-  'ARTEFACT_UNCOMMON':   {n:'Необычный',       c:'#4ade80', q:1, art:true},
-  'ARTEFACT_SPECIAL':    {n:'Особый',          c:'#60a5fa', q:2, art:true},
-  'ARTEFACT_RARE':       {n:'Редкий',          c:'#c084fc', q:3, art:true},
-  'ARTEFACT_EPIC':       {n:'Исключительный',  c:'#f97474', q:4, art:true},
-  'ARTEFACT_LEGENDARY':  {n:'Легендарный',     c:'#fbbf24', q:5, art:true},
-  // Ранги предметов
-  'RANK_BEGINNER':       {n:'Отмычка',         c:'#9ca3af', q:0, art:false},
-  'RANK_STALKER':        {n:'Сталкер',         c:'#4ade80', q:1, art:false},
-  'RANK_VETERAN':        {n:'Ветеран',         c:'#60a5fa', q:2, art:false},
-  'RANK_MASTER':         {n:'Мастер',          c:'#f97474', q:3, art:false},
-  'RANK_LEGEND':         {n:'Легенда',         c:'#fbbf24', q:4, art:false},
-  // Запасные варианты
-  'COMMON':              {n:'Обычный',         c:'#9ca3af', q:0, art:false},
-  'UNCOMMON':            {n:'Необычный',       c:'#4ade80', q:1, art:false},
-  'SPECIAL':             {n:'Особый',          c:'#60a5fa', q:2, art:false},
-  'RARE':                {n:'Редкий',          c:'#c084fc', q:3, art:false},
-  'EPIC':                {n:'Исключительный',  c:'#f97474', q:4, art:false},
-  'LEGENDARY':           {n:'Легендарный',     c:'#fbbf24', q:5, art:false},
-};
-
-// Качество лота из API (числовое) → цвет/имя по категории
-function qualityColor(quality, isArt) {
-  if(isArt) {
-    const artColors = ['#9ca3af','#4ade80','#60a5fa','#c084fc','#f97474','#fbbf24'];
-    const artNames  = ['Обычный','Необычный','Особый','Редкий','Исключительный','Легендарный'];
-    return {c: artColors[quality]||'#9ca3af', n: artNames[quality]||'—'};
-  } else {
-    const rnkColors = ['#9ca3af','#4ade80','#60a5fa','#f97474','#fbbf24','#fbbf24'];
-    const rnkNames  = ['Отмычка','Сталкер','Ветеран','Мастер','Легенда','Легенда'];
-    return {c: rnkColors[quality]||'#9ca3af', n: rnkNames[quality]||'—'};
-  }
-}
-
-function colorInfo(colorStr) {
-  return COLOR_MAP[colorStr] || {n:'—', c:'#9ca3af', q:0, art:false};
-}
-
-const isArtCat = cat => cat==='artefact'||cat==='artifact';
-
-// ══ КАТЕГОРИИ ═══════════════════════════════════════════════
-const CATS = {
-  armor:'Костюмы', artefact:'Артефакты', container:'Контейнеры',
-  backpack:'Рюкзаки', ammo:'Патроны', medicine:'Медикаменты',
-  grenade:'Гранаты', attachment:'Обвесы', weapon:'Оружие',
-  weapon_module:'Оружейные модули', misc:'Прочее', system:'Системное',
-};
-
-// Редкости артефактов для фильтра в лотах
-const ART_RARITIES = [
-  {key:'ARTEFACT_COMMON',    n:'Обычный',        c:'#9ca3af', q:[0]},
-  {key:'ARTEFACT_UNCOMMON',  n:'Необычный',      c:'#4ade80', q:[1]},
-  {key:'ARTEFACT_SPECIAL',   n:'Особый',         c:'#60a5fa', q:[2]},
-  {key:'ARTEFACT_EPIC',      n:'Исключительный', c:'#f97474', q:[3,4]},
-  {key:'ARTEFACT_LEGENDARY', n:'Легендарный',    c:'#fbbf24', q:[5]},
+// ══ ЦВЕТА И РЕДКОСТИ ════════════════════════════════════════
+// Артефакты: quality 0-5
+const ART = [
+  {q:[0], n:'Обычный',        c:'#9ca3af'},
+  {q:[1], n:'Необычный',      c:'#4ade80'},
+  {q:[2], n:'Особый',         c:'#60a5fa'},
+  {q:[3], n:'Редкий',         c:'#c084fc'},
+  {q:[4], n:'Исключительный', c:'#f97474'},
+  {q:[5], n:'Легендарный',    c:'#fbbf24'},
 ];
+// Предметы: rank quality 0-4
+const RNK = [
+  {q:[0], n:'Отмычка', c:'#9ca3af'},
+  {q:[1], n:'Сталкер', c:'#60a5fa'},
+  {q:[2], n:'Ветеран',  c:'#f472b6'},
+  {q:[3], n:'Мастер',   c:'#f97474'},
+  {q:[4,5], n:'Легенда',c:'#fbbf24'},
+];
+
+function getRarInfo(quality, isArt) {
+  const list = isArt ? ART : RNK;
+  const found = list.find(r => r.q.includes(quality));
+  return found || {n:'—', c:'#9ca3af'};
+}
+
+const isArtCat = cat => cat === 'artefact';
+
+// ══ КАТЕГОРИИ (из реального GitHub дерева) ══════════════════
+const CATS = {
+  armor:          'Броня',
+  artefact:       'Артефакты',
+  attachment:     'Обвесы',
+  backpacks:      'Рюкзаки',
+  bullet:         'Патроны',
+  containers:     'Контейнеры',
+  drink:          'Напитки',
+  food:           'Еда',
+  grenade:        'Гранаты',
+  medicine:       'Медикаменты',
+  misc:           'Прочее',
+  other:          'Другое',
+  weapon:         'Оружие',
+  weapon_modules: 'Оружейные модули',
+};
 
 // ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
 const S = {
-  flt:{cat:'',enh:-1,qf:null,qt:null},
-  sort:{f:'price',d:'asc'},
-  rarFilter:[],   // выбранные quality values для фильтра лотов
-  prof:false,
-  item:null,
-  lots:[],total:0,page:0,pages:1,loading:false,
-  cfg:{notif:false,ipp:10,thr:20},
-  chart:null,favMode:false,recMode:false,
+  flt:    {cat:'', enh:-1, qf:null, qt:null},
+  sort:   {f:'price', d:'asc'},
+  rarFilter: [],  // выбранные quality numbers для лотов
+  prof:   false,
+  item:   null,
+  lots:[], total:0, page:0, pages:1, loading:false,
+  cfg:    {notif:false, ipp:10, thr:20},
+  chart:  null, favMode:false, recMode:false,
 };
 
-// ══ ХРАНИЛИЩЕ ═══════════════════════════════════════════════
-const getFavs=()=>{try{return JSON.parse(localStorage.getItem('scf')||'[]');}catch{return[];}};
-const togFav=id=>{const f=getFavs(),i=f.indexOf(id);i>=0?f.splice(i,1):f.unshift(id);localStorage.setItem('scf',JSON.stringify(f.slice(0,50)));};
-const isFav=id=>getFavs().includes(id);
-const getRec=()=>{try{return JSON.parse(localStorage.getItem('scr')||'[]');}catch{return[];}};
-const addRec=(id,n,cat,color)=>{const r=getRec().filter(x=>x.id!==id);r.unshift({id,n,cat,color});localStorage.setItem('scr',JSON.stringify(r.slice(0,10)));};
+// ══ ЛОКАЛЬНОЕ ХРАНИЛИЩЕ ═════════════════════════════════════
+const getFavs = () => { try{return JSON.parse(localStorage.getItem('scf')||'[]');}catch{return[];} };
+const togFav  = id => { const f=getFavs(), i=f.indexOf(id); i>=0?f.splice(i,1):f.unshift(id); localStorage.setItem('scf',JSON.stringify(f.slice(0,50))); };
+const isFav   = id => getFavs().includes(id);
+const getRec  = () => { try{return JSON.parse(localStorage.getItem('scr')||'[]');}catch{return[];} };
+const addRec  = (id,n,cat,cp,ip) => { const r=getRec().filter(x=>x.id!==id); r.unshift({id,n,cat,cp,ip}); localStorage.setItem('scr',JSON.stringify(r.slice(0,10))); };
 
 // ══ УТИЛИТЫ ═════════════════════════════════════════════════
-const $=id=>document.getElementById(id);
-const fP=v=>v?v.toLocaleString('ru-RU')+' ₽':'—';
-const deb=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};};
-const toast=(m,d=2000)=>{const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d);};
+const $ = id => document.getElementById(id);
+const fP = v => v ? v.toLocaleString('ru-RU')+' ₽' : '—';
+const deb = (fn,ms) => { let t; return(...a) => { clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
+const toast = (m,d=2000) => { const e=$('toast'); e.textContent=m; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),d); };
 function fT(s){if(!s)return'—';try{const dt=new Date(s),now=new Date(),diff=Math.floor((dt-now)/1000);if(diff<=0)return'Истёк';const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);if(d)return`${d}д ${h}ч`;if(h)return`${h}ч ${m}м`;return`${m}м`;}catch{return'—';}}
 
 // ══ НАВИГАЦИЯ ═══════════════════════════════════════════════
-document.querySelectorAll('.nb').forEach(b=>{
-  b.addEventListener('click',()=>{
+document.querySelectorAll('.nb').forEach(b => {
+  b.addEventListener('click', () => {
     const v=b.dataset.v;
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
     document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
-    $(`view-${v}`).classList.add('active');b.classList.add('on');
+    $(`view-${v}`).classList.add('active'); b.classList.add('on');
     $('cnt').scrollTop=0;
   });
 });
 
 // ══ ИКОНКИ ══════════════════════════════════════════════════
 function mkIcon(icon_path, id, sz=40, extraCls='') {
+  const base = `width:${sz}px;height:${sz}px;border-radius:${sz>=44?7:6}px;flex-shrink:0`;
   if(icon_path) {
     const img=document.createElement('img');
-    img.className=`iimg${extraCls?' '+extraCls:''}`;
-    img.style.cssText=`width:${sz}px;height:${sz}px;border-radius:${sz>=44?7:6}px`;
-    img.src=ICON_URL(icon_path);
-    img.onerror=()=>{
-      const ph=mkPlaceholder(id,sz,extraCls);img.replaceWith(ph);
-    };
+    img.className=`iimg ${extraCls}`.trim();
+    img.style.cssText=base;
+    img.src=iconURL(icon_path);
+    img.onerror=()=>{ const ph=mkPH(id,sz,extraCls); img.replaceWith(ph); };
     return img;
   }
-  return mkPlaceholder(id,sz,extraCls);
+  return mkPH(id,sz,extraCls);
 }
-function mkPlaceholder(id,sz,extraCls='') {
+function mkPH(id,sz,extraCls='') {
   const ph=document.createElement('div');
-  ph.className=`iph${extraCls?' '+extraCls:''}`;
+  ph.className=`iph ${extraCls}`.trim();
   ph.style.cssText=`width:${sz}px;height:${sz}px;border-radius:${sz>=44?7:6}px`;
   ph.textContent=(id||'?').slice(0,4).toUpperCase();
   return ph;
@@ -443,19 +424,19 @@ function mkPlaceholder(id,sz,extraCls='') {
 
 // ══ КАРТОЧКА ПРЕДМЕТА ═══════════════════════════════════════
 function mkItemCard(item) {
-  const {id,name,category:cat='misc',color:colorStr='',icon_path=''} = item;
-  const ci = colorInfo(colorStr);
-  const clr = ci.c, rname = ci.n;
+  const {id, name, category:cat='misc', icon_path='', color_hex='#9ca3af', rarity_name=''} = item;
   const fav = isFav(id);
-  const card = document.createElement('div');card.className='ic';
-  const iconWrap=document.createElement('div');iconWrap.style.flexShrink='0';
-  iconWrap.appendChild(mkIcon(icon_path, id));
+  const card = document.createElement('div'); card.className='ic';
+  const iconWrap=document.createElement('div'); iconWrap.style.flexShrink='0';
+  iconWrap.appendChild(mkIcon(icon_path||item.ip||'', id));
   card.appendChild(iconWrap);
-  const info=document.createElement('div');info.className='iinfo';
-  info.innerHTML=`<div class="iname" style="color:${clr}">${name||id}</div>
-    <div class="isub">${CATS[cat]||cat}${ci.n&&ci.n!=='—'?' · <span style="color:'+clr+';font-weight:700">'+rname+'</span>':''}</div>`;
+  const info=document.createElement('div'); info.className='iinfo';
+  const sub = rarity_name
+    ? `${CATS[cat]||cat} · <span style="color:${color_hex};font-weight:700">${rarity_name}</span>`
+    : (CATS[cat]||cat);
+  info.innerHTML=`<div class="iname" style="color:${color_hex}">${name||id}</div><div class="isub">${sub}</div>`;
   card.appendChild(info);
-  const star=document.createElement('button');star.className=`star${fav?' on':''}`;star.textContent='★';
+  const star=document.createElement('button'); star.className=`star${fav?' on':''}`; star.textContent='★';
   star.addEventListener('click',e=>{e.stopPropagation();togFav(id);star.classList.toggle('on',isFav(id));});
   card.appendChild(star);
   card.addEventListener('click',()=>openLots(item));
@@ -463,108 +444,115 @@ function mkItemCard(item) {
 }
 
 // ══ ПОИСК ПРЕДМЕТОВ ═════════════════════════════════════════
-async function searchItems(q='',cat='',favList=null,recList=null){
+async function searchItems(q='', cat='', favList=null, recList=null) {
   const list=$('ilist');
-  if(favList!==null){
+  if(favList!==null) {
     list.innerHTML='';
     if(!favList.length){list.innerHTML=`<div class="empty"><div class="et">Нет избранных</div></div>`;return;}
-    favList.forEach(id=>list.appendChild(mkItemCard({id,name:id,category:'misc',color:'',icon_path:''})));
+    favList.forEach(id=>list.appendChild(mkItemCard({id,name:id,category:'misc',icon_path:'',color_hex:'#9ca3af',rarity_name:''})));
     return;
   }
-  if(recList!==null){
+  if(recList!==null) {
     list.innerHTML='';
     if(!recList.length){list.innerHTML=`<div class="empty"><div class="et">Нет недавних</div></div>`;return;}
-    recList.forEach(r=>list.appendChild(mkItemCard({id:r.id,name:r.n,category:r.cat,color:r.color||'',icon_path:r.icon_path||''})));
+    recList.forEach(r=>list.appendChild(mkItemCard({id:r.id,name:r.n,category:r.cat||'misc',icon_path:r.ip||'',color_hex:'#9ca3af',rarity_name:''})));
     return;
   }
-  if(!q&&!cat){
-    list.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><div class="et">Введи название предмета</div><div class="es">Поиск по базе данных игры</div></div>`;
+  if(!q&&!cat) {
+    list.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><div class="et">Введи название предмета</div><div class="es">Поиск по официальной базе данных игры</div></div>`;
     return;
   }
-  list.innerHTML='';for(let i=0;i<5;i++)list.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div></div>`;
-  try{
-    const p=new URLSearchParams();if(q)p.set('q',q);if(cat)p.set('category',cat);p.set('limit',40);
+  list.innerHTML=''; for(let i=0;i<5;i++) list.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div></div>`;
+  try {
+    const p=new URLSearchParams(); if(q)p.set('q',q); if(cat)p.set('category',cat); p.set('limit',40);
     const data=await fetch(`${BACKEND}/api/items/search?${p}`).then(r=>r.json());
     list.innerHTML='';
     if(!data.length){list.innerHTML=`<div class="empty"><div class="et">Ничего не найдено</div></div>`;return;}
     data.forEach(item=>list.appendChild(mkItemCard(item)));
-  }catch(e){list.innerHTML=`<div class="empty"><div class="et">Ошибка загрузки</div></div>`;toast('Ошибка соединения');}
+  } catch(e) { list.innerHTML=`<div class="empty"><div class="et">Ошибка загрузки</div></div>`; toast('Ошибка соединения'); }
 }
 
 // ══ ОТКРЫТИЕ ЛОТОВ ══════════════════════════════════════════
-async function openLots(item){
-  S.item=item;S.page=0;S.lots=[];S.prof=false;S.rarFilter=[];
+async function openLots(item) {
+  S.item=item; S.page=0; S.lots=[]; S.prof=false; S.rarFilter=[];
   $('ptog').classList.remove('on');
-  addRec(item.id,item.name||item.id,item.category||'misc',item.color||'',item.icon_path||'');
+  $('ropen').classList.remove('on');
+  addRec(item.id, item.name||item.id, item.category||'misc', item.cat_path||'', item.icon_path||'');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  $('view-lots').classList.add('active');$('cnt').scrollTop=0;
+  $('view-lots').classList.add('active'); $('cnt').scrollTop=0;
 
   const cat=item.category||'misc';
-  const ci=colorInfo(item.color||'');
-  const clr=ci.c, rname=ci.n;
+  const art=isArtCat(cat);
+  const clr=item.color_hex||'#9ca3af';
+  const rname=item.rarity_name||'';
 
-  // Показываем кнопку "Редкость" только для артефактов
-  $('ropen').style.display = isArtCat(cat) ? '' : 'none';
+  // Кнопка редкости — для всех предметов
+  $('rbtnlbl').textContent = art ? 'Редкость' : 'Ранг';
 
-  const lii=$('lii');lii.innerHTML='';
+  const lii=$('lii'); lii.innerHTML='';
   lii.appendChild(mkIcon(item.icon_path||'', item.id, 44));
   const txt=document.createElement('div');
   txt.innerHTML=`<div class="lin" style="color:${clr}">${item.name||item.id}</div>
-    <div class="lct">${CATS[cat]||cat}${rname&&rname!=='—'?' · <span style="color:'+clr+'">'+rname+'</span>':''}</div>`;
+    <div class="lct">${CATS[cat]||cat}${rname?' · <span style="color:'+clr+'">'+rname+'</span>':''}</div>`;
   lii.appendChild(txt);
   await loadLots(0);
 }
 
 // ══ ЗАГРУЗКА ЛОТОВ ══════════════════════════════════════════
-async function loadLots(page=0){
-  if(S.loading)return;S.loading=true;
-  const list=$('llist'),more=$('lmore');
-  if(page===0){skels(list);more.innerHTML='';}
-  try{
-    const item=S.item;if(!item)return;
-    let lots=[],total=0,pages=1;
-    if(S.prof){
-      const p=new URLSearchParams({q:item.name||item.id,threshold:((100-S.cfg.thr)/100).toFixed(2)});
+async function loadLots(page=0) {
+  if(S.loading) return; S.loading=true;
+  const list=$('llist'), more=$('lmore');
+  if(page===0){skels(list); more.innerHTML='';}
+  try {
+    const item=S.item; if(!item) return;
+    let lots=[], total=0, pages=1;
+    if(S.prof) {
+      const p=new URLSearchParams({q:item.name||item.id, threshold:((100-S.cfg.thr)/100).toFixed(2)});
       if(item.category)p.set('category',item.category);
       const d=await fetch(`${BACKEND}/api/profitable?${p}`).then(r=>r.json());
-      lots=d.lots||[];total=lots.length;pages=1;
+      lots=d.lots||[]; total=lots.length; pages=1;
     } else {
-      const p=new URLSearchParams({sort:S.sort.f,asc:S.sort.d==='asc',page,per_page:S.cfg.ipp});
-      p.set('q',item.name||item.id);if(item.category)p.set('category',item.category);
-      if(S.rarFilter.length){
-        // Map quality indices to rarity param
-        const qs=S.rarFilter.join(',');p.set('rarity_values',qs);
+      const p=new URLSearchParams({sort:S.sort.f, asc:S.sort.d==='asc', page, per_page:S.cfg.ipp});
+      p.set('q', item.name||item.id);
+      if(item.category)p.set('category',item.category);
+      // Map rarFilter quality numbers to rarity param
+      if(S.rarFilter.length) {
+        // Find which rarity key covers these quality numbers
+        const rarKeys = {white:[0],green:[1],blue:[2],purple:[3],red:[4],yellow:[5]};
+        const matched = Object.entries(rarKeys).find(([k,v])=>v.some(q=>S.rarFilter.includes(q)));
+        if(matched) p.set('rarity', matched[0]);
       }
       if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
-      if(S.flt.qf)p.set('qty_from',S.flt.qf);if(S.flt.qt)p.set('qty_to',S.flt.qt);
+      if(S.flt.qf)p.set('qty_from',S.flt.qf); if(S.flt.qt)p.set('qty_to',S.flt.qt);
       const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
-      lots=d.lots||[];total=d.total||0;pages=d.pages||1;
-      S.total=total;S.pages=pages;
+      lots=d.lots||[]; total=d.total||0; pages=d.pages||1;
+      S.total=total; S.pages=pages;
     }
-    if(page===0)list.innerHTML='';
+    if(page===0) list.innerHTML='';
     S.lots=page===0?lots:[...S.lots,...lots];
     if(!lots.length&&page===0){list.innerHTML=`<div class="empty"><div class="et">Лотов нет</div><div class="es">На аукционе нет активных лотов</div></div>`;}
     else lots.forEach(l=>list.appendChild(mkLotCard(l)));
     more.innerHTML='';
     if(!S.prof&&page<S.pages-1){
-      const b=document.createElement('button');b.className='lm';b.textContent=`Ещё (${total-S.lots.length})`;
-      b.onclick=()=>loadLots(page+1);more.appendChild(b);
+      const b=document.createElement('button'); b.className='lm';
+      b.textContent=`Ещё (${total-S.lots.length})`; b.onclick=()=>loadLots(page+1);
+      more.appendChild(b);
     }
-  }catch(e){$('llist').innerHTML=`<div class="empty"><div class="et">Ошибка загрузки</div></div>`;toast('Ошибка соединения');}
-  finally{S.loading=false;}
+  } catch(e) { $('llist').innerHTML=`<div class="empty"><div class="et">Ошибка загрузки</div></div>`; toast('Ошибка соединения'); }
+  finally { S.loading=false; }
 }
 
-function skels(c){c.innerHTML='';for(let i=0;i<5;i++)c.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div><div class="sl1 w3"></div></div>`;}
+function skels(c){c.innerHTML=''; for(let i=0;i<5;i++) c.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div><div class="sl1 w3"></div></div>`;}
 
 // ══ КАРТОЧКА ЛОТА ═══════════════════════════════════════════
-function mkLotCard(lot){
-  const item=S.item,cat=item?.category||'misc';
-  const art=isArtCat(cat);
+function mkLotCard(lot) {
+  const item=S.item, cat=item?.category||'misc', art=isArtCat(cat);
   const add=lot.additional||{};
-  // Качество лота берём из lot.additional.quality (числовое)
   const quality=lot._quality??add.quality??0;
-  const {c:clr,n:rname}=qualityColor(quality,art);
+  // Use backend-enriched color if available, otherwise compute
+  const clr=lot._color_hex || getRarInfo(quality,art).c;
+  const rname=lot._rarity_name || getRarInfo(quality,art).n;
   const enh=lot._enh??add.potentialLevel??0;
   const price=lot.buyoutPrice||lot.startPrice||0;
   const bid=lot.startPrice||0;
@@ -574,8 +562,8 @@ function mkLotCard(lot){
   const name=lot._name||item?.name||item?.id||'—';
   const urg=time.includes('м')&&parseInt(time)<15;
   const studied=lot._studied??add.isResearched??add.researched??null;
-  const card=document.createElement('div');card.className='lc';
-  let discH=lot._discount?`<div class="ldsc">−${lot._discount}% · ${lot._profit_label||''}</div>`:'';
+  const card=document.createElement('div'); card.className='lc';
+  let discH=lot._discount?`<div class="ldsc">−${lot._discount}%</div>`:'';
   let studH=art&&studied!==null?(studied?`<span class="bg bg-ok">Изучен</span>`:`<span class="bg bg-q">Не изучен</span>`):'';
   card.innerHTML=`<div class="lbar" style="background:${clr}"></div>
   <div class="lbody">
@@ -597,101 +585,103 @@ function mkLotCard(lot){
 }
 
 // ══ ВЫГОДНЫЕ / НАЗАД ════════════════════════════════════════
-$('ptog').addEventListener('click',()=>{S.prof=!S.prof;$('ptog').classList.toggle('on',S.prof);loadLots(0);});
+$('ptog').addEventListener('click',()=>{ S.prof=!S.prof; $('ptog').classList.toggle('on',S.prof); loadLots(0); });
 $('lbk').addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  $('view-search').classList.add('active');document.querySelector('[data-v="search"]').classList.add('on');
+  $('view-search').classList.add('active');
+  document.querySelector('[data-v="search"]').classList.add('on');
   $('cnt').scrollTop=0;
 });
 
 // ══ СОРТИРОВКА ══════════════════════════════════════════════
-$('sopen').addEventListener('click',()=>{$('sov').classList.add('on');$('ssh').classList.add('on');});
-$('sov').addEventListener('click',()=>{$('sov').classList.remove('on');$('ssh').classList.remove('on');loadLots(0);});
-document.querySelectorAll('#sfld .sc2').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#sfld .sc2').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.sort.f=b.dataset.f;});});
-document.querySelectorAll('.db').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.db').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.sort.d=b.dataset.d;});});
+$('sopen').addEventListener('click',()=>{ $('sov').classList.add('on'); $('ssh').classList.add('on'); });
+$('sov').addEventListener('click',()=>{ $('sov').classList.remove('on'); $('ssh').classList.remove('on'); loadLots(0); });
+document.querySelectorAll('#sfld .sc2').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('#sfld .sc2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.f=b.dataset.f; }); });
+document.querySelectorAll('.db').forEach(b=>{ b.addEventListener('click',()=>{ document.querySelectorAll('.db').forEach(x=>x.classList.remove('on')); b.classList.add('on'); S.sort.d=b.dataset.d; }); });
 
-// ══ РЕДКОСТЬ (для артефактов) ════════════════════════════════
-function buildRarList(){
-  const rl=$('rlist');rl.innerHTML='';
-  ART_RARITIES.forEach(r=>{
+// ══ ШТОРКА РЕДКОСТИ / РАНГА ════════════════════════════════
+function buildRarList() {
+  const rl=$('rlist'); rl.innerHTML='';
+  const item=S.item, cat=item?.category||'misc', art=isArtCat(cat);
+  const list = art ? ART : RNK;
+  $('rsh-title').textContent = art ? 'Редкость артефакта' : 'Ранг предмета';
+  list.forEach(r=>{
     const on=r.q.some(qv=>S.rarFilter.includes(qv));
-    const item=document.createElement('div');item.className=`ritem${on?' on':''}`;item.style.color=r.c;
-    item.innerHTML=`<div class="rchk"><svg class="rchi" viewBox="0 0 10 10" fill="none"><polyline points="1.5 5 4 7.5 8.5 2.5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>${r.n}</span>`;
-    item.addEventListener('click',()=>{
-      r.q.forEach(qv=>{const idx=S.rarFilter.indexOf(qv);idx>=0?S.rarFilter.splice(idx,1):S.rarFilter.push(qv);});
-      item.classList.toggle('on',r.q.some(qv=>S.rarFilter.includes(qv)));
-      // Update button state
+    const el=document.createElement('div'); el.className=`ritem${on?' on':''}`; el.style.color=r.c;
+    el.innerHTML=`<div class="rchk"><svg class="rchi" viewBox="0 0 10 10" fill="none"><polyline points="1.5 5 4 7.5 8.5 2.5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>${r.n}</span>`;
+    el.addEventListener('click',()=>{
+      r.q.forEach(qv=>{ const idx=S.rarFilter.indexOf(qv); idx>=0?S.rarFilter.splice(idx,1):S.rarFilter.push(qv); });
+      el.classList.toggle('on',r.q.some(qv=>S.rarFilter.includes(qv)));
       $('ropen').classList.toggle('on',S.rarFilter.length>0);
     });
-    rl.appendChild(item);
+    rl.appendChild(el);
   });
 }
-$('ropen').addEventListener('click',()=>{buildRarList();$('rov').classList.add('on');$('rsh').classList.add('on');});
-$('rov').addEventListener('click',()=>{$('rov').classList.remove('on');$('rsh').classList.remove('on');});
-$('rap').addEventListener('click',()=>{$('rov').classList.remove('on');$('rsh').classList.remove('on');loadLots(0);});
+$('ropen').addEventListener('click',()=>{ buildRarList(); $('rov').classList.add('on'); $('rsh').classList.add('on'); });
+$('rov').addEventListener('click',()=>{ $('rov').classList.remove('on'); $('rsh').classList.remove('on'); });
+$('rap').addEventListener('click',()=>{ $('rov').classList.remove('on'); $('rsh').classList.remove('on'); loadLots(0); });
 
-// ══ ФИЛЬТРЫ (поиск предметов) ═══════════════════════════════
-function buildCatGrid(){
+// ══ ФИЛЬТРЫ ПОИСКА ═══════════════════════════════════════════
+function buildCatGrid() {
   const cg=$('cg');
   Object.entries(CATS).forEach(([k,v])=>{
-    const b=document.createElement('button');b.className='cb';b.dataset.k=k;b.textContent=v;
-    b.addEventListener('click',()=>{S.flt.cat=S.flt.cat===k?'':k;cg.querySelectorAll('.cb').forEach(x=>x.classList.toggle('on',x.dataset.k===S.flt.cat));});
+    const b=document.createElement('button'); b.className='cb'; b.dataset.k=k; b.textContent=v;
+    b.addEventListener('click',()=>{ S.flt.cat=S.flt.cat===k?'':k; cg.querySelectorAll('.cb').forEach(x=>x.classList.toggle('on',x.dataset.k===S.flt.cat)); });
     cg.appendChild(b);
   });
 }
-
 function openFilter(){
   $('cg').querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.k===S.flt.cat));
   $('esl').value=S.flt.enh<0?-1:S.flt.enh;
   $('ev').textContent=S.flt.enh<0?'Любая':`+${S.flt.enh}`;
   $('ecl').style.display=S.flt.enh>=0?'block':'none';
-  $('qf').value=S.flt.qf||'';$('qt').value=S.flt.qt||'';
-  $('fov').classList.add('on');$('fsh').classList.add('on');
+  $('qf').value=S.flt.qf||''; $('qt').value=S.flt.qt||'';
+  $('fov').classList.add('on'); $('fsh').classList.add('on');
 }
-function closeFilter(){$('fov').classList.remove('on');$('fsh').classList.remove('on');}
+function closeFilter(){ $('fov').classList.remove('on'); $('fsh').classList.remove('on'); }
 $('fopen').addEventListener('click',openFilter);
 $('fov').addEventListener('click',closeFilter);
 $('fsap').addEventListener('click',()=>{
-  S.flt.qf=parseInt($('qf').value)||null;S.flt.qt=parseInt($('qt').value)||null;
-  closeFilter();searchItems($('sq').value,S.flt.cat);
+  S.flt.qf=parseInt($('qf').value)||null; S.flt.qt=parseInt($('qt').value)||null;
+  closeFilter(); searchItems($('sq').value, S.flt.cat);
 });
-const esl=$('esl'),ev=$('ev'),ecl=$('ecl');
-esl.addEventListener('input',()=>{const v=parseInt(esl.value);S.flt.enh=v;ev.textContent=v<0?'Любая':`+${v}`;ecl.style.display=v>=0?'block':'none';});
-ecl.addEventListener('click',()=>{esl.value=-1;S.flt.enh=-1;ev.textContent='Любая';ecl.style.display='none';});
+const esl=$('esl'), ev=$('ev'), ecl=$('ecl');
+esl.addEventListener('input',()=>{ const v=parseInt(esl.value); S.flt.enh=v; ev.textContent=v<0?'Любая':`+${v}`; ecl.style.display=v>=0?'block':'none'; });
+ecl.addEventListener('click',()=>{ esl.value=-1; S.flt.enh=-1; ev.textContent='Любая'; ecl.style.display='none'; });
 
-// ══ ИЗБРАННОЕ / НЕДАВНИЕ ═════════════════════════════════════
+// ══ ИЗБРАННОЕ / НЕДАВНИЕ ════════════════════════════════════
 $('cfav').addEventListener('click',()=>{
-  S.favMode=!S.favMode;S.recMode=false;
-  $('cfav').classList.toggle('on',S.favMode);$('crec').classList.remove('on');
-  S.favMode?searchItems('','',getFavs()):searchItems($('sq').value,S.flt.cat);
+  S.favMode=!S.favMode; S.recMode=false;
+  $('cfav').classList.toggle('on',S.favMode); $('crec').classList.remove('on');
+  S.favMode ? searchItems('','',getFavs()) : searchItems($('sq').value,S.flt.cat);
 });
 $('crec').addEventListener('click',()=>{
-  S.recMode=!S.recMode;S.favMode=false;
-  $('crec').classList.toggle('on',S.recMode);$('cfav').classList.remove('on');
-  S.recMode?searchItems('','',null,getRec()):searchItems($('sq').value,S.flt.cat);
+  S.recMode=!S.recMode; S.favMode=false;
+  $('crec').classList.toggle('on',S.recMode); $('cfav').classList.remove('on');
+  S.recMode ? searchItems('','',null,getRec()) : searchItems($('sq').value,S.flt.cat);
 });
 
 // ══ АВТОПОИСК ═══════════════════════════════════════════════
-const debS=deb(q=>{S.favMode=false;S.recMode=false;$('cfav').classList.remove('on');$('crec').classList.remove('on');searchItems(q,S.flt.cat);},450);
+const debS=deb(q=>{ S.favMode=false;S.recMode=false; $('cfav').classList.remove('on');$('crec').classList.remove('on'); searchItems(q,S.flt.cat); },450);
 $('sq').addEventListener('input',e=>debS(e.target.value));
 
-// ══ ИСТОРИЯ ═════════════════════════════════════════════════
+// ══ ИСТОРИЯ ПРОДАЖ ══════════════════════════════════════════
 async function loadHist(q){
-  if(!q.trim())return;
-  const c=$('hc');c.innerHTML='<div class="empty"><div class="spin"></div></div>';
+  if(!q.trim()) return;
+  const c=$('hc'); c.innerHTML='<div class="empty"><div class="spin"></div></div>';
   try{
     const items=await fetch(`${BACKEND}/api/items/search?q=${encodeURIComponent(q)}&limit=1`).then(r=>r.json());
     if(!items.length){c.innerHTML=`<div class="empty"><div class="et">Не найдено</div></div>`;return;}
     const item=items[0];
     const data=await fetch(`${BACKEND}/api/history/${item.id}`).then(r=>r.json());
     if(!data.records?.length){c.innerHTML=`<div class="empty"><div class="et">${item.name||item.id}</div><div class="es">История пуста</div></div>`;return;}
-    renderHist(data);
+    renderHist(data, item.color_hex||'#c8ff47');
   }catch{c.innerHTML=`<div class="empty"><div class="et">Ошибка</div></div>`;}
 }
-function renderHist(data){
-  const c=$('hc'),s=data.stats||{};
-  c.innerHTML=`<div style="padding:0 10px 6px"><div style="font-size:15px;font-weight:700;color:var(--tx)">${data.item_name}</div><div style="font-size:11px;color:var(--t3)">${data.records.length} продаж</div></div>
+function renderHist(data, itemColor='#c8ff47'){
+  const c=$('hc'), s=data.stats||{};
+  c.innerHTML=`<div style="padding:0 10px 6px"><div style="font-size:15px;font-weight:700;color:${itemColor}">${data.item_name}</div><div style="font-size:11px;color:var(--t3)">${data.records.length} продаж</div></div>
   <div class="cw"><div class="cc"><canvas id="pc"></canvas></div></div>
   <div class="sg">
     <div class="scard"><div class="slbl">Минимум</div><div class="sval">${fP(s.min)}</div></div>
@@ -704,8 +694,8 @@ function renderHist(data){
   const labels=data.records.map(r=>{const d=new Date(r.ts);return`${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`;});
   const prices=data.records.map(r=>r.price);
   const med=s.median||0;
-  const ptC=prices.map(p=>{if(!med)return'#c8ff47';const r=p/med;if(r<0.7)return'#4bff9a';if(r<0.9)return'#4ade80';if(r<1.1)return'#c8ff47';if(r<1.3)return'#f97474';return'#fbbf24';});
-  S.chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:prices,borderColor:'#c8ff47',backgroundColor:x=>{const g=x.chart.ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,'rgba(200,255,71,.15)');g.addColorStop(1,'rgba(200,255,71,0)');return g;},fill:true,borderWidth:1.5,pointRadius:4,pointBackgroundColor:ptC,pointBorderColor:ptC,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2230',borderColor:'#2e3448',borderWidth:1,titleColor:'#7a8099',bodyColor:'#c8ff47',bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:x=>fP(x.parsed.y)}}},scales:{x:{ticks:{color:'#4a5070',font:{size:9},maxRotation:0},grid:{color:'rgba(37,42,56,.8)'}},y:{ticks:{color:'#4a5070',font:{family:'JetBrains Mono',size:9},callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:'rgba(37,42,56,.8)'}}}}}); 
+  const ptC=prices.map(p=>{if(!med)return itemColor;const r=p/med;if(r<0.7)return'#4bff9a';if(r<0.9)return'#4ade80';if(r<1.1)return itemColor;if(r<1.3)return'#f97474';return'#fbbf24';});
+  S.chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{data:prices,borderColor:itemColor,backgroundColor:x=>{const g=x.chart.ctx.createLinearGradient(0,0,0,170);g.addColorStop(0,itemColor+'33');g.addColorStop(1,itemColor+'00');return g;},fill:true,borderWidth:1.5,pointRadius:4,pointBackgroundColor:ptC,pointBorderColor:ptC,tension:.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e2230',borderColor:'#2e3448',borderWidth:1,titleColor:'#7a8099',bodyColor:itemColor,bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:x=>fP(x.parsed.y)}}},scales:{x:{ticks:{color:'#4a5070',font:{size:9},maxRotation:0},grid:{color:'rgba(37,42,56,.8)'}},y:{ticks:{color:'#4a5070',font:{family:'JetBrains Mono',size:9},callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v},grid:{color:'rgba(37,42,56,.8)'}}}}}); 
 }
 const debH=deb(loadHist,500);
 $('hq').addEventListener('input',e=>debH(e.target.value));
@@ -724,7 +714,7 @@ $('tm').addEventListener('click',()=>{if(S.cfg.thr>5){S.cfg.thr-=5;syncCfg();}})
 $('tp').addEventListener('click',()=>{if(S.cfg.thr<50){S.cfg.thr+=5;syncCfg();}});
 
 // ══ ЗАПУСК ══════════════════════════════════════════════════
-buildCatGrid();syncCfg();
+buildCatGrid(); syncCfg();
 searchItems('','');
 </script>
 </body>
