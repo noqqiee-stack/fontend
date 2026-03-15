@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>STALCRAFT Auction</title>
+<title>STALCRAFT Аукцион</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -21,6 +21,10 @@ img{display:block}
   --tx:#e8eaf0;--t2:#7a8099;--t3:#4a5070;
   --danger:#ff4b4b;--ok:#4bff9a;
   --nav-h:56px;--sb:env(safe-area-inset-bottom,0px);
+  /* Artifact quality colors */
+  --qc0:#9ca3af;--qc1:#4ade80;--qc2:#60a5fa;--qc3:#c084fc;--qc4:#f97474;--qc5:#fbbf24;
+  /* Item rank colors */
+  --rc0:#9ca3af;--rc1:#4ade80;--rc2:#60a5fa;--rc3:#f97474;--rc4:#fbbf24;
 }
 #app{position:fixed;inset:0;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;overflow:hidden}
 #cnt{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+var(--sb)+4px)}
@@ -35,8 +39,8 @@ img{display:block}
 /* HEADER */
 .vh{position:sticky;top:0;z-index:50;background:var(--bg);padding:10px 12px 0;border-bottom:1px solid var(--brd)}
 .vt{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
-/* SEARCH INPUT */
-.si-w{position:relative}
+/* INPUT */
+.si-w{position:relative;margin-bottom:8px}
 .si-w svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--t3);width:14px;height:14px;pointer-events:none}
 .si{width:100%;height:38px;background:var(--bg2);border:1px solid var(--brd);border-radius:7px;padding:0 9px 0 29px;color:var(--tx);font-size:14px;outline:none;transition:border-color .14s}
 .si:focus{border-color:var(--ac)}.si::placeholder{color:var(--t3)}
@@ -45,48 +49,47 @@ img{display:block}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;height:24px;padding:0 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:20px;color:var(--t3);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;white-space:nowrap;transition:all .12s}
 .chip.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
-/* ITEM CARD */
+/* ITEM LIST */
 .il{padding:6px 10px 0}
 .ic{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg1);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:transform .08s,border-color .12s;animation:fi .18s ease both}
-.ic:active{transform:scale(.99);border-color:var(--brd2)}
+.ic:active{transform:scale(.99)}
 .iimg{width:40px;height:40px;border-radius:6px;background:var(--bg2);object-fit:contain;flex-shrink:0;border:1px solid var(--brd)}
-.iph{width:40px;height:40px;border-radius:6px;background:var(--bg2);flex-shrink:0;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--t3)}
+.iph{width:40px;height:40px;border-radius:6px;background:var(--bg2);flex-shrink:0;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--t3);text-align:center;line-height:1.2;padding:2px}
 .iinfo{flex:1;min-width:0}
 .iname{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .isub{font-size:11px;color:var(--t3);margin-top:2px}
 .star{width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:var(--t3);transition:color .12s}
 .star.on{color:#fbbf24}
-/* LOTS VIEW */
+/* LOTS HEADER */
 .lh{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--brd);padding:8px 12px}
-.lback{display:flex;align-items:center;gap:6px;margin-bottom:8px;cursor:pointer}
-.lback svg{width:16px;height:16px;color:var(--t2)}.lback span{font-size:12px;color:var(--t2);font-weight:600}
+.lbk{display:flex;align-items:center;gap:6px;margin-bottom:8px;cursor:pointer}
+.lbk svg{width:16px;height:16px;color:var(--t2)}.lbk span{font-size:12px;color:var(--t2);font-weight:600}
 .lii{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .liimg{width:44px;height:44px;border-radius:7px;background:var(--bg2);object-fit:contain;border:1px solid var(--brd)}
 .lin{font-size:17px;font-weight:700;line-height:1.2}
 .lct{font-size:11px;color:var(--t3);margin-top:2px}
-.lctrl{display:flex;gap:6px}
-.ptog{display:flex;align-items:center;gap:5px;padding:6px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
-.ptog.on{background:rgba(75,255,154,.08);border-color:var(--ok);color:var(--ok)}
-.ptog svg{width:12px;height:12px}
-.sbtn2{display:flex;align-items:center;gap:5px;padding:6px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
-.sbtn2.on{border-color:var(--ac);color:var(--ac)}
-.sbtn2 svg{width:12px;height:12px}
+/* Controls row */
+.lctrl{display:flex;gap:5px;flex-wrap:wrap}
+.ctrbtn{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border:1px solid var(--brd);border-radius:6px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s;white-space:nowrap}
+.ctrbtn svg{width:11px;height:11px}
+.ctrbtn.on{border-color:var(--ac);color:var(--ac)}
+.ctrbtn.prof.on{border-color:var(--ok);color:var(--ok);background:rgba(75,255,154,.08)}
 /* LOT CARD */
 .ll{padding:6px 10px 0}
 .lc{display:flex;overflow:hidden;background:var(--bg1);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;animation:fi .18s ease both}
-.lb{width:3px;flex-shrink:0}
+.lbar{width:3px;flex-shrink:0}
 .lbody{flex:1;padding:9px 10px}
 .ltop{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.ln{font-size:14px;font-weight:700;line-height:1.2;flex:1}
-.lt{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0}
-.lt.urg{color:var(--danger)}
-.bgs{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.lname{font-size:14px;font-weight:700;line-height:1.2;flex:1}
+.ltime{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--t3);flex-shrink:0}
+.ltime.urg{color:var(--danger)}
+.lbgs{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
 .bg{font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 5px;border-radius:2px;font-weight:500}
 .bg-r{background:var(--bg3);border:1px solid var(--brd)}
 .bg-e{color:#ffd700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.25)}
 .bg-q{color:var(--t3);background:var(--bg2)}
 .bg-ok{color:#34d399;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25)}
-.lp{margin-top:7px}
+.lpr{margin-top:7px}
 .lprice{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500;color:var(--ac)}
 .lpsub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);margin-top:1px}
 .ldsc{display:inline-block;margin-top:4px;background:rgba(75,255,154,.1);border:1px solid rgba(75,255,154,.3);color:var(--ok);font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:2px}
@@ -100,27 +103,25 @@ img{display:block}
 .shs{padding:0 14px 12px;border-bottom:1px solid var(--brd)}
 .shs:last-child{border-bottom:none;padding-bottom:0}
 .shl{font-size:11px;font-weight:600;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;margin-top:10px}
-/* Sort chips */
 .sr{display:flex;flex-wrap:wrap;gap:5px;padding:4px 0}
 .sc2{padding:6px 12px;background:var(--bg2);border:1px solid var(--brd);border-radius:5px;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s;font-family:'Rajdhani',sans-serif}
 .sc2.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
 .sdd{display:flex;gap:6px;padding:4px 0}
 .db{flex:1;padding:8px;background:var(--bg2);border:1px solid var(--brd);border-radius:5px;text-align:center;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
 .db.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
+/* Rarity sheet - column list */
+.rlist{display:flex;flex-direction:column;gap:4px;padding:4px 0}
+.ritem{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border:1px solid transparent;border-radius:6px;cursor:pointer;transition:all .12s;font-size:13px;font-weight:600}
+.ritem.on{border-color:currentColor;background:color-mix(in srgb,currentColor 10%,transparent)}
+.rchk{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--brd2);background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
+.ritem.on .rchk{border-color:currentColor;background:currentColor}
+.rchi{width:8px;height:8px;opacity:0;transition:opacity .1s}
+.ritem.on .rchi{opacity:1}
 /* Cat grid */
 .cg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .cb{padding:7px 3px;background:var(--bg2);border:1px solid var(--brd);border-radius:5px;text-align:center;font-size:11px;font-weight:600;color:var(--t2);cursor:pointer;transition:all .12s}
 .cb.on{background:var(--adim);border-color:var(--ac);color:var(--ac)}
-/* Rarity list */
-.rl{display:flex;flex-direction:column;gap:4px}
-.ri{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2);border:1px solid transparent;border-radius:5px;cursor:pointer;transition:all .12s}
-.ri.on{border-color:currentColor;background:color-mix(in srgb,currentColor 8%,transparent)}
-.rck{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--brd2);background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s}
-.ri.on .rck{border-color:currentColor;background:currentColor}
-.rcki{width:8px;height:8px;opacity:0;transition:opacity .1s}
-.ri.on .rcki{opacity:1}
-.rn{font-size:12px;font-weight:600}
-/* Enh slider */
+/* Enh */
 .ew{padding:2px 0 8px}
 .ev{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--ac);text-align:center;margin-bottom:6px}
 .esl{width:100%;height:4px;-webkit-appearance:none;appearance:none;background:var(--bg3);border-radius:2px;outline:none}
@@ -129,7 +130,7 @@ img{display:block}
 .emk{display:flex;justify-content:space-between;margin-top:5px}
 .em{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t3)}
 .ecl{margin-top:6px;font-size:11px;color:var(--t3);text-decoration:underline;background:none;border:none;cursor:pointer}
-.fsap{width:calc(100% - 28px);margin:12px 14px 0;height:42px;background:var(--ac);color:#0a0b0d;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:7px;transition:background .12s;display:block}
+.fsap{width:calc(100% - 28px);margin:12px 14px 0;height:42px;background:var(--ac);color:#0a0b0d;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:7px;display:block}
 .fsap:active{background:var(--ac2)}
 /* History */
 .cw{margin:0 10px;background:var(--bg1);border:1px solid var(--brd);border-radius:7px;padding:12px}
@@ -150,8 +151,7 @@ img{display:block}
 .tth{position:absolute;width:16px;height:16px;background:var(--t3);border-radius:50%;top:2px;left:2px;transition:all .2s;pointer-events:none}
 .tgl input:checked~.tth{transform:translateX(20px);background:var(--ac)}
 .stp{display:flex;align-items:center;gap:10px}
-.stpb{width:30px;height:30px;border-radius:5px;background:var(--bg2);border:1px solid var(--brd);color:var(--tx);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .12s}
-.stpb:active{background:var(--bg3)}
+.stpb{width:30px;height:30px;border-radius:5px;background:var(--bg2);border:1px solid var(--brd);color:var(--tx);font-size:16px;display:flex;align-items:center;justify-content:center}
 .stpv{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--ac);min-width:22px;text-align:center}
 /* Misc */
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:10px;color:var(--t3);text-align:center}
@@ -171,14 +171,14 @@ img{display:block}
 <div id="app">
   <div id="cnt">
 
-    <!-- SEARCH -->
+    <!-- ПОИСК -->
     <div id="view-search" class="view active">
       <div class="vh">
-        <div class="vt">Аукцион — STALCRAFT</div>
+        <div class="vt">STALCRAFT — Аукцион</div>
         <div style="display:flex;gap:6px;margin-bottom:8px">
-          <div class="si-w" style="flex:1">
+          <div class="si-w" style="flex:1;margin:0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <input class="si" id="sq" type="text" placeholder="Поиск предмета из базы..." autocomplete="off">
+            <input class="si" id="sq" type="text" placeholder="Поиск предмета..." autocomplete="off">
           </div>
           <button id="fopen" style="width:38px;height:38px;background:var(--bg2);border:1px solid var(--brd);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;color:var(--t2)"><path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z"/></svg>
@@ -186,23 +186,26 @@ img{display:block}
         </div>
         <div class="chips">
           <button class="chip" id="cfav">★ Избранное</button>
-          <button class="chip" id="crecent">🕐 Недавние</button>
+          <button class="chip" id="crec">🕐 Недавние</button>
         </div>
       </div>
       <div id="ilist" class="il"></div>
     </div>
 
-    <!-- LOTS -->
+    <!-- ЛОТЫ -->
     <div id="view-lots" class="view">
       <div class="lh">
-        <div class="lback" id="lback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg><span>Назад к поиску</span></div>
+        <div class="lbk" id="lbk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg><span>Назад к поиску</span></div>
         <div class="lii" id="lii"></div>
         <div class="lctrl">
-          <button class="ptog" id="ptog">
+          <button class="ctrbtn prof" id="ptog">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>Выгодные
           </button>
-          <button class="sbtn2" id="sopen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Сортировка
+          <button class="ctrbtn" id="ropen" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>Редкость
+          </button>
+          <button class="ctrbtn" id="sopen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/></svg>Сортировка
           </button>
         </div>
       </div>
@@ -210,11 +213,11 @@ img{display:block}
       <div id="lmore"></div>
     </div>
 
-    <!-- HISTORY -->
+    <!-- ИСТОРИЯ -->
     <div id="view-history" class="view">
       <div class="vh">
         <div class="vt">История продаж</div>
-        <div class="si-w" style="margin-bottom:8px">
+        <div class="si-w">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <input class="si" id="hq" type="text" placeholder="Название предмета..." autocomplete="off">
         </div>
@@ -224,31 +227,30 @@ img{display:block}
       </div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- НАСТРОЙКИ -->
     <div id="view-settings" class="view">
       <div class="vh"><div class="vt">Настройки</div></div>
       <div class="stl" style="padding-top:10px">
         <div class="srow"><div><div class="snm">Уведомления</div><div class="sds">О новых лотах по последним фильтрам</div></div><label class="tgl"><input type="checkbox" id="ntf"><div class="ttr"></div><div class="tth"></div></label></div>
         <div class="srow"><div><div class="snm">Лотов на страницу</div><div class="sds">Количество лотов за один запрос</div></div><div class="stp"><button class="stpb" id="im">−</button><div class="stpv" id="iv">10</div><button class="stpb" id="ip">+</button></div></div>
         <div class="srow"><div><div class="snm">Порог выгоды</div><div class="sds">Скидка от медианы цен</div></div><div class="stp"><button class="stpb" id="tm">−</button><div class="stpv" id="tv">20<span style="font-size:9px;opacity:.5">%</span></div><button class="stpb" id="tp">+</button></div></div>
-        <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v4.0</span> — STALCRAFT Auction Mini App</div>
+        <div style="padding:6px 2px;font-size:12px;color:var(--t3);line-height:1.8"><span style="color:var(--ac)">v5.0</span> — STALCRAFT Аукцион Мини-приложение</div>
       </div>
     </div>
 
   </div>
 
-  <!-- NAVBAR -->
+  <!-- ПАНЕЛЬ НАВИГАЦИИ -->
   <div id="nav">
     <button class="nb on" data-v="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><span>Поиск</span></button>
     <button class="nb" data-v="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span>История</span></button>
     <button class="nb" data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Настройки</span></button>
   </div>
 
-  <!-- SORT SHEET -->
+  <!-- СОРТИРОВКА -->
   <div class="ov" id="sov"></div>
   <div class="sh" id="ssh">
-    <div class="shh"></div>
-    <div class="sht">Сортировка</div>
+    <div class="shh"></div><div class="sht">Сортировка</div>
     <div class="shs">
       <div class="shl" style="margin-top:0">По полю</div>
       <div class="sr" id="sfld">
@@ -256,7 +258,7 @@ img{display:block}
         <button class="sc2" data-f="bid">Цена ставки</button>
         <button class="sc2" data-f="time">Время окончания</button>
         <button class="sc2" data-f="amount">Количество</button>
-        <button class="sc2" data-f="quality">Редкость / Ранг</button>
+        <button class="sc2" data-f="quality">Редкость</button>
       </div>
     </div>
     <div class="shs">
@@ -268,19 +270,25 @@ img{display:block}
     </div>
   </div>
 
-  <!-- FILTER SHEET -->
+  <!-- РЕДКОСТЬ (только для артефактов) -->
+  <div class="ov" id="rov"></div>
+  <div class="sh" id="rsh">
+    <div class="shh"></div><div class="sht">Редкость артефакта</div>
+    <div class="shs">
+      <div class="rlist" id="rlist">
+        <!-- Filled by JS -->
+      </div>
+      <button class="fsap" style="margin-top:10px" id="rap">Применить</button>
+    </div>
+  </div>
+
+  <!-- ФИЛЬТРЫ (поиск предметов) -->
   <div class="ov" id="fov"></div>
   <div class="sh" id="fsh">
-    <div class="shh"></div>
-    <div class="sht">Фильтры</div>
+    <div class="shh"></div><div class="sht">Фильтры</div>
     <div class="shs">
       <div class="shl" style="margin-top:0">Категория</div>
       <div class="cg" id="cg"></div>
-    </div>
-    <div class="shs">
-      <div class="shl">Редкость / Ранг</div>
-      <div id="rhint" style="font-size:11px;color:var(--t3);margin-bottom:8px"></div>
-      <div class="rl" id="rl"></div>
     </div>
     <div class="shs">
       <div class="shl">Заточка</div>
@@ -288,14 +296,14 @@ img{display:block}
         <div class="ev" id="ev">Любая</div>
         <input type="range" class="esl" id="esl" min="-1" max="15" value="-1" step="1">
         <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
-        <button class="ecl" id="ecl" style="display:none">Сбросить заточку</button>
+        <button class="ecl" id="ecl" style="display:none">Сбросить</button>
       </div>
     </div>
     <div class="shs">
       <div class="shl">Количество в стаке</div>
       <div style="display:flex;gap:6px">
-        <input class="si" id="qf" type="number" placeholder="От" min="1" style="flex:1">
-        <input class="si" id="qt" type="number" placeholder="До" min="1" style="flex:1">
+        <input class="si" id="qf" type="number" placeholder="От" min="1" style="flex:1;margin:0">
+        <input class="si" id="qt" type="number" placeholder="До" min="1" style="flex:1;margin:0">
       </div>
     </div>
     <button class="fsap" id="fsap">Применить</button>
@@ -305,40 +313,80 @@ img{display:block}
 </div>
 
 <script>
-const BACKEND  = 'https://backend-seven-topaz-14.vercel.app';
-const ICON     = id => `https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main/global/icons/${id}.png`;
+// ══ КОНФИГ ══════════════════════════════════════════════════
+const BACKEND = 'https://backend-seven-topaz-14.vercel.app';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/EXBO-Studio/stalcraft-database/main';
+const ICON_URL = (icon_path) => icon_path ? `${GITHUB_RAW}/${icon_path}` : '';
 
 const tg = window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor('#0a0b0d');tg.setBackgroundColor('#0a0b0d');}
 
-// ═══ RARITIES ═══════════════════════════════════════════
-const ART_R=[
-  {q:[0],n:'Обычный',        c:'#9ca3af'},
-  {q:[1],n:'Необычный',      c:'#4ade80'},
-  {q:[2],n:'Особый',         c:'#60a5fa'},
-  {q:[3],n:'Редкий',         c:'#c084fc'},
-  {q:[4],n:'Исключительный', c:'#f97474'},
-  {q:[5],n:'Легендарный',    c:'#fbbf24'},
-];
-const ITM_R=[
-  {q:[0],n:'Отмычка',c:'#9ca3af'},
-  {q:[1],n:'Сталкер',c:'#4ade80'},
-  {q:[2],n:'Ветеран', c:'#60a5fa'},
-  {q:[3],n:'Мастер',  c:'#f97474'},
-  {q:[4,5],n:'Легенда',c:'#fbbf24'},
-];
-const isArt=cat=>cat==='artefact'||cat==='artifact';
-const getRars=cat=>isArt(cat)?ART_R:ITM_R;
-const getC=(q,cat)=>{const f=getRars(cat).find(r=>r.q.includes(q));return f?f.c:'#9ca3af';};
-const getN=(q,cat)=>{const f=getRars(cat).find(r=>r.q.includes(q));return f?f.n:'—';};
+// ══ СИСТЕМА ЦВЕТОВ ══════════════════════════════════════════
+// color строка из базы данных → {display_name, hex_color, quality_index}
+const COLOR_MAP = {
+  // Артефакты
+  'ARTEFACT_COMMON':     {n:'Обычный',        c:'#9ca3af', q:0, art:true},
+  'ARTEFACT_UNCOMMON':   {n:'Необычный',       c:'#4ade80', q:1, art:true},
+  'ARTEFACT_SPECIAL':    {n:'Особый',          c:'#60a5fa', q:2, art:true},
+  'ARTEFACT_RARE':       {n:'Редкий',          c:'#c084fc', q:3, art:true},
+  'ARTEFACT_EPIC':       {n:'Исключительный',  c:'#f97474', q:4, art:true},
+  'ARTEFACT_LEGENDARY':  {n:'Легендарный',     c:'#fbbf24', q:5, art:true},
+  // Ранги предметов
+  'RANK_BEGINNER':       {n:'Отмычка',         c:'#9ca3af', q:0, art:false},
+  'RANK_STALKER':        {n:'Сталкер',         c:'#4ade80', q:1, art:false},
+  'RANK_VETERAN':        {n:'Ветеран',         c:'#60a5fa', q:2, art:false},
+  'RANK_MASTER':         {n:'Мастер',          c:'#f97474', q:3, art:false},
+  'RANK_LEGEND':         {n:'Легенда',         c:'#fbbf24', q:4, art:false},
+  // Запасные варианты
+  'COMMON':              {n:'Обычный',         c:'#9ca3af', q:0, art:false},
+  'UNCOMMON':            {n:'Необычный',       c:'#4ade80', q:1, art:false},
+  'SPECIAL':             {n:'Особый',          c:'#60a5fa', q:2, art:false},
+  'RARE':                {n:'Редкий',          c:'#c084fc', q:3, art:false},
+  'EPIC':                {n:'Исключительный',  c:'#f97474', q:4, art:false},
+  'LEGENDARY':           {n:'Легендарный',     c:'#fbbf24', q:5, art:false},
+};
 
-// ═══ CATEGORIES ═════════════════════════════════════════
-const CATS={armor:'Костюмы',artefact:'Артефакты',container:'Контейнеры',backpack:'Рюкзаки',ammo:'Патроны',medicine:'Медикаменты',grenade:'Гранаты',attachment:'Обвесы',weapon:'Оружие',weapon_module:'Оружейные модули',misc:'Прочее',system:'Системное'};
+// Качество лота из API (числовое) → цвет/имя по категории
+function qualityColor(quality, isArt) {
+  if(isArt) {
+    const artColors = ['#9ca3af','#4ade80','#60a5fa','#c084fc','#f97474','#fbbf24'];
+    const artNames  = ['Обычный','Необычный','Особый','Редкий','Исключительный','Легендарный'];
+    return {c: artColors[quality]||'#9ca3af', n: artNames[quality]||'—'};
+  } else {
+    const rnkColors = ['#9ca3af','#4ade80','#60a5fa','#f97474','#fbbf24','#fbbf24'];
+    const rnkNames  = ['Отмычка','Сталкер','Ветеран','Мастер','Легенда','Легенда'];
+    return {c: rnkColors[quality]||'#9ca3af', n: rnkNames[quality]||'—'};
+  }
+}
 
-// ═══ STATE ══════════════════════════════════════════════
-const S={
-  flt:{cat:'',rars:[],enh:-1,qf:null,qt:null},
+function colorInfo(colorStr) {
+  return COLOR_MAP[colorStr] || {n:'—', c:'#9ca3af', q:0, art:false};
+}
+
+const isArtCat = cat => cat==='artefact'||cat==='artifact';
+
+// ══ КАТЕГОРИИ ═══════════════════════════════════════════════
+const CATS = {
+  armor:'Костюмы', artefact:'Артефакты', container:'Контейнеры',
+  backpack:'Рюкзаки', ammo:'Патроны', medicine:'Медикаменты',
+  grenade:'Гранаты', attachment:'Обвесы', weapon:'Оружие',
+  weapon_module:'Оружейные модули', misc:'Прочее', system:'Системное',
+};
+
+// Редкости артефактов для фильтра в лотах
+const ART_RARITIES = [
+  {key:'ARTEFACT_COMMON',    n:'Обычный',        c:'#9ca3af', q:[0]},
+  {key:'ARTEFACT_UNCOMMON',  n:'Необычный',      c:'#4ade80', q:[1]},
+  {key:'ARTEFACT_SPECIAL',   n:'Особый',         c:'#60a5fa', q:[2]},
+  {key:'ARTEFACT_EPIC',      n:'Исключительный', c:'#f97474', q:[3,4]},
+  {key:'ARTEFACT_LEGENDARY', n:'Легендарный',    c:'#fbbf24', q:[5]},
+];
+
+// ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
+const S = {
+  flt:{cat:'',enh:-1,qf:null,qt:null},
   sort:{f:'price',d:'asc'},
+  rarFilter:[],   // выбранные quality values для фильтра лотов
   prof:false,
   item:null,
   lots:[],total:0,page:0,pages:1,loading:false,
@@ -346,61 +394,66 @@ const S={
   chart:null,favMode:false,recMode:false,
 };
 
-// ═══ STORAGE ════════════════════════════════════════════
+// ══ ХРАНИЛИЩЕ ═══════════════════════════════════════════════
 const getFavs=()=>{try{return JSON.parse(localStorage.getItem('scf')||'[]');}catch{return[];}};
-const togFav=id=>{const f=getFavs();const i=f.indexOf(id);i>=0?f.splice(i,1):f.unshift(id);localStorage.setItem('scf',JSON.stringify(f.slice(0,50)));};
+const togFav=id=>{const f=getFavs(),i=f.indexOf(id);i>=0?f.splice(i,1):f.unshift(id);localStorage.setItem('scf',JSON.stringify(f.slice(0,50)));};
 const isFav=id=>getFavs().includes(id);
 const getRec=()=>{try{return JSON.parse(localStorage.getItem('scr')||'[]');}catch{return[];}};
-const addRec=(id,n,cat)=>{const r=getRec().filter(x=>x.id!==id);r.unshift({id,n,cat});localStorage.setItem('scr',JSON.stringify(r.slice(0,10)));};
+const addRec=(id,n,cat,color)=>{const r=getRec().filter(x=>x.id!==id);r.unshift({id,n,cat,color});localStorage.setItem('scr',JSON.stringify(r.slice(0,10)));};
 
-// ═══ UTILS ══════════════════════════════════════════════
+// ══ УТИЛИТЫ ═════════════════════════════════════════════════
 const $=id=>document.getElementById(id);
 const fP=v=>v?v.toLocaleString('ru-RU')+' ₽':'—';
 const deb=(fn,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};};
-const toast=(msg,d=2000)=>{const e=$('toast');e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d);};
-function fT(s){
-  if(!s)return'—';
-  try{const dt=new Date(s),now=new Date(),diff=Math.floor((dt-now)/1000);
-  if(diff<=0)return'Истёк';const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);
-  if(d)return`${d}д ${h}ч`;if(h)return`${h}ч ${m}м`;return`${m}м`;}catch{return'—';}
-}
+const toast=(m,d=2000)=>{const e=$('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),d);};
+function fT(s){if(!s)return'—';try{const dt=new Date(s),now=new Date(),diff=Math.floor((dt-now)/1000);if(diff<=0)return'Истёк';const d=Math.floor(diff/86400),h=Math.floor((diff%86400)/3600),m=Math.floor((diff%3600)/60);if(d)return`${d}д ${h}ч`;if(h)return`${h}ч ${m}м`;return`${m}м`;}catch{return'—';}}
 
-// ═══ NAV ════════════════════════════════════════════════
+// ══ НАВИГАЦИЯ ═══════════════════════════════════════════════
 document.querySelectorAll('.nb').forEach(b=>{
   b.addEventListener('click',()=>{
     const v=b.dataset.v;
     document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
     document.querySelectorAll('.nb').forEach(x=>x.classList.remove('on'));
-    $(`view-${v}`).classList.add('active');
-    b.classList.add('on');
+    $(`view-${v}`).classList.add('active');b.classList.add('on');
     $('cnt').scrollTop=0;
   });
 });
 
-// ═══ ICON ═══════════════════════════════════════════════
-function mkIcon(id,sz=40,cls='iimg'){
-  const img=document.createElement('img');
-  img.className=cls;img.style.cssText=`width:${sz}px;height:${sz}px`;
-  img.src=ICON(id);
-  img.onerror=()=>{
-    const ph=document.createElement('div');
-    ph.className=cls==='liimg'?'iph':cls;
-    ph.style.cssText=`width:${sz}px;height:${sz}px;border-radius:${sz===44?7:6}px;background:var(--bg2);flex-shrink:0;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--t3)`;
-    ph.textContent=id.slice(0,3).toUpperCase();
-    img.replaceWith(ph);
-  };
-  return img;
+// ══ ИКОНКИ ══════════════════════════════════════════════════
+function mkIcon(icon_path, id, sz=40, extraCls='') {
+  if(icon_path) {
+    const img=document.createElement('img');
+    img.className=`iimg${extraCls?' '+extraCls:''}`;
+    img.style.cssText=`width:${sz}px;height:${sz}px;border-radius:${sz>=44?7:6}px`;
+    img.src=ICON_URL(icon_path);
+    img.onerror=()=>{
+      const ph=mkPlaceholder(id,sz,extraCls);img.replaceWith(ph);
+    };
+    return img;
+  }
+  return mkPlaceholder(id,sz,extraCls);
+}
+function mkPlaceholder(id,sz,extraCls='') {
+  const ph=document.createElement('div');
+  ph.className=`iph${extraCls?' '+extraCls:''}`;
+  ph.style.cssText=`width:${sz}px;height:${sz}px;border-radius:${sz>=44?7:6}px`;
+  ph.textContent=(id||'?').slice(0,4).toUpperCase();
+  return ph;
 }
 
-// ═══ ITEM CARD ══════════════════════════════════════════
-function mkItemCard(item){
-  const{id,name,category:cat='misc',color:clrIdx=0}=item;
-  const c=getC(clrIdx,cat),rn=getN(clrIdx,cat),fav=isFav(id);
-  const card=document.createElement('div');card.className='ic';
-  const ico=document.createElement('div');ico.style.cssText='flex-shrink:0';ico.appendChild(mkIcon(id));
-  card.appendChild(ico);
+// ══ КАРТОЧКА ПРЕДМЕТА ═══════════════════════════════════════
+function mkItemCard(item) {
+  const {id,name,category:cat='misc',color:colorStr='',icon_path=''} = item;
+  const ci = colorInfo(colorStr);
+  const clr = ci.c, rname = ci.n;
+  const fav = isFav(id);
+  const card = document.createElement('div');card.className='ic';
+  const iconWrap=document.createElement('div');iconWrap.style.flexShrink='0';
+  iconWrap.appendChild(mkIcon(icon_path, id));
+  card.appendChild(iconWrap);
   const info=document.createElement('div');info.className='iinfo';
-  info.innerHTML=`<div class="iname" style="color:${c}">${name}</div><div class="isub">${CATS[cat]||cat} · <span style="color:${c};font-weight:700">${rn}</span></div>`;
+  info.innerHTML=`<div class="iname" style="color:${clr}">${name||id}</div>
+    <div class="isub">${CATS[cat]||cat}${ci.n&&ci.n!=='—'?' · <span style="color:'+clr+';font-weight:700">'+rname+'</span>':''}</div>`;
   card.appendChild(info);
   const star=document.createElement('button');star.className=`star${fav?' on':''}`;star.textContent='★';
   star.addEventListener('click',e=>{e.stopPropagation();togFav(id);star.classList.toggle('on',isFav(id));});
@@ -409,30 +462,26 @@ function mkItemCard(item){
   return card;
 }
 
-// ═══ SEARCH ITEMS ═══════════════════════════════════════
+// ══ ПОИСК ПРЕДМЕТОВ ═════════════════════════════════════════
 async function searchItems(q='',cat='',favList=null,recList=null){
   const list=$('ilist');
   if(favList!==null){
     list.innerHTML='';
     if(!favList.length){list.innerHTML=`<div class="empty"><div class="et">Нет избранных</div></div>`;return;}
-    favList.forEach(id=>list.appendChild(mkItemCard({id,name:id,category:'misc',color:0})));
-    try{const d=await fetch(`${BACKEND}/api/items/search?limit=200`).then(r=>r.json());
-    d.forEach(it=>{if(favList.includes(it.id)){const c=list.querySelector(`[data-id="${it.id}"]`);
-    if(c){c.querySelector('.iname').textContent=it.name;c.querySelector('.iname').style.color=getC(it.color||0,it.category||'misc');}}});}catch{}
+    favList.forEach(id=>list.appendChild(mkItemCard({id,name:id,category:'misc',color:'',icon_path:''})));
     return;
   }
   if(recList!==null){
     list.innerHTML='';
     if(!recList.length){list.innerHTML=`<div class="empty"><div class="et">Нет недавних</div></div>`;return;}
-    recList.forEach(r=>list.appendChild(mkItemCard({id:r.id,name:r.n,category:r.cat,color:0})));
+    recList.forEach(r=>list.appendChild(mkItemCard({id:r.id,name:r.n,category:r.cat,color:r.color||'',icon_path:r.icon_path||''})));
     return;
   }
   if(!q&&!cat){
     list.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><div class="et">Введи название предмета</div><div class="es">Поиск по базе данных игры</div></div>`;
     return;
   }
-  list.innerHTML='';
-  for(let i=0;i<5;i++)list.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div></div>`;
+  list.innerHTML='';for(let i=0;i<5;i++)list.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div></div>`;
   try{
     const p=new URLSearchParams();if(q)p.set('q',q);if(cat)p.set('category',cat);p.set('limit',40);
     const data=await fetch(`${BACKEND}/api/items/search?${p}`).then(r=>r.json());
@@ -442,26 +491,32 @@ async function searchItems(q='',cat='',favList=null,recList=null){
   }catch(e){list.innerHTML=`<div class="empty"><div class="et">Ошибка загрузки</div></div>`;toast('Ошибка соединения');}
 }
 
-// ═══ OPEN LOTS ══════════════════════════════════════════
+// ══ ОТКРЫТИЕ ЛОТОВ ══════════════════════════════════════════
 async function openLots(item){
-  S.item=item;S.page=0;S.lots=[];S.prof=false;
+  S.item=item;S.page=0;S.lots=[];S.prof=false;S.rarFilter=[];
   $('ptog').classList.remove('on');
-  addRec(item.id,item.name,item.category||'misc');
+  addRec(item.id,item.name||item.id,item.category||'misc',item.color||'',item.icon_path||'');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  $('view-lots').classList.add('active');
-  $('cnt').scrollTop=0;
-  const cat=item.category||'misc',clrIdx=item.color||0;
-  const c=getC(clrIdx,cat),rn=getN(clrIdx,cat);
+  $('view-lots').classList.add('active');$('cnt').scrollTop=0;
+
+  const cat=item.category||'misc';
+  const ci=colorInfo(item.color||'');
+  const clr=ci.c, rname=ci.n;
+
+  // Показываем кнопку "Редкость" только для артефактов
+  $('ropen').style.display = isArtCat(cat) ? '' : 'none';
+
   const lii=$('lii');lii.innerHTML='';
-  const img=mkIcon(item.id,44,'liimg');lii.appendChild(img);
+  lii.appendChild(mkIcon(item.icon_path||'', item.id, 44));
   const txt=document.createElement('div');
-  txt.innerHTML=`<div class="lin" style="color:${c}">${item.name}</div><div class="lct">${CATS[cat]||cat} · <span style="color:${c}">${rn}</span></div>`;
+  txt.innerHTML=`<div class="lin" style="color:${clr}">${item.name||item.id}</div>
+    <div class="lct">${CATS[cat]||cat}${rname&&rname!=='—'?' · <span style="color:'+clr+'">'+rname+'</span>':''}</div>`;
   lii.appendChild(txt);
   await loadLots(0);
 }
 
-// ═══ LOAD LOTS ══════════════════════════════════════════
+// ══ ЗАГРУЗКА ЛОТОВ ══════════════════════════════════════════
 async function loadLots(page=0){
   if(S.loading)return;S.loading=true;
   const list=$('llist'),more=$('lmore');
@@ -470,14 +525,17 @@ async function loadLots(page=0){
     const item=S.item;if(!item)return;
     let lots=[],total=0,pages=1;
     if(S.prof){
-      const p=new URLSearchParams({q:item.name,threshold:((100-S.cfg.thr)/100).toFixed(2)});
+      const p=new URLSearchParams({q:item.name||item.id,threshold:((100-S.cfg.thr)/100).toFixed(2)});
       if(item.category)p.set('category',item.category);
       const d=await fetch(`${BACKEND}/api/profitable?${p}`).then(r=>r.json());
       lots=d.lots||[];total=lots.length;pages=1;
     } else {
       const p=new URLSearchParams({sort:S.sort.f,asc:S.sort.d==='asc',page,per_page:S.cfg.ipp});
-      p.set('q',item.name);if(item.category)p.set('category',item.category);
-      if(S.flt.rars.length)p.set('rarity_values',S.flt.rars.join(','));
+      p.set('q',item.name||item.id);if(item.category)p.set('category',item.category);
+      if(S.rarFilter.length){
+        // Map quality indices to rarity param
+        const qs=S.rarFilter.join(',');p.set('rarity_values',qs);
+      }
       if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
       if(S.flt.qf)p.set('qty_from',S.flt.qf);if(S.flt.qt)p.set('qty_to',S.flt.qt);
       const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
@@ -499,36 +557,36 @@ async function loadLots(page=0){
 
 function skels(c){c.innerHTML='';for(let i=0;i<5;i++)c.innerHTML+=`<div class="sk" style="animation-delay:${i*.07}s"><div class="sl1 w7"></div><div class="sl1 w5"></div><div class="sl1 w3"></div></div>`;}
 
-// ═══ LOT CARD ═══════════════════════════════════════════
+// ══ КАРТОЧКА ЛОТА ═══════════════════════════════════════════
 function mkLotCard(lot){
   const item=S.item,cat=item?.category||'misc';
+  const art=isArtCat(cat);
   const add=lot.additional||{};
-  const q=lot._quality??add.quality??0;
+  // Качество лота берём из lot.additional.quality (числовое)
+  const quality=lot._quality??add.quality??0;
+  const {c:clr,n:rname}=qualityColor(quality,art);
   const enh=lot._enh??add.potentialLevel??0;
-  const c=getC(q,cat),rn=getN(q,cat);
   const price=lot.buyoutPrice||lot.startPrice||0;
   const bid=lot.startPrice||0;
   const amt=lot.amount||1;
   const pu=lot._perUnit||(amt>1&&price?Math.floor(price/amt):null);
   const time=lot._timeLeft||fT(lot.endTime);
-  const name=lot._name||item?.name||'—';
+  const name=lot._name||item?.name||item?.id||'—';
   const urg=time.includes('м')&&parseInt(time)<15;
-  // Artifact studied
-  const studied=add.isResearched??add.researched??add.studied??null;
+  const studied=lot._studied??add.isResearched??add.researched??null;
   const card=document.createElement('div');card.className='lc';
-  let discH='';if(lot._discount)discH=`<div class="ldsc">−${lot._discount}% · ${lot._profit_label||''}</div>`;
-  let studH='';
-  if(isArt(cat)&&studied!==null)studH=studied?`<span class="bg bg-ok">Изучен</span>`:`<span class="bg" style="color:var(--t3);background:var(--bg2);border:1px solid var(--brd)">Не изучен</span>`;
-  card.innerHTML=`<div class="lb" style="background:${c}"></div>
+  let discH=lot._discount?`<div class="ldsc">−${lot._discount}% · ${lot._profit_label||''}</div>`:'';
+  let studH=art&&studied!==null?(studied?`<span class="bg bg-ok">Изучен</span>`:`<span class="bg bg-q">Не изучен</span>`):'';
+  card.innerHTML=`<div class="lbar" style="background:${clr}"></div>
   <div class="lbody">
-    <div class="ltop"><div class="ln" style="color:${c}">${name}</div><div class="lt${urg?' urg':''}">${time}</div></div>
-    <div class="bgs">
-      <span class="bg bg-r" style="color:${c};border-color:${c}44">${rn}</span>
+    <div class="ltop"><div class="lname" style="color:${clr}">${name}</div><div class="ltime${urg?' urg':''}">${time}</div></div>
+    <div class="lbgs">
+      <span class="bg bg-r" style="color:${clr};border-color:${clr}44">${rname}</span>
       ${enh>0?`<span class="bg bg-e">+${enh}</span>`:''}
       ${amt>1?`<span class="bg bg-q">×${amt}</span>`:''}
       ${studH}
     </div>
-    <div class="lp">
+    <div class="lpr">
       <div class="lprice">${fP(price)}</div>
       ${pu?`<div class="lpsub">${fP(pu)}/шт</div>`:''}
       ${bid&&bid!==price?`<div class="lpsub">Ставка: ${fP(bid)}</div>`:''}
@@ -538,52 +596,53 @@ function mkLotCard(lot){
   return card;
 }
 
-// ═══ PROFITABLE ═════════════════════════════════════════
+// ══ ВЫГОДНЫЕ / НАЗАД ════════════════════════════════════════
 $('ptog').addEventListener('click',()=>{S.prof=!S.prof;$('ptog').classList.toggle('on',S.prof);loadLots(0);});
-$('lback').addEventListener('click',()=>{
+$('lbk').addEventListener('click',()=>{
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
-  $('view-search').classList.add('active');
-  document.querySelector('[data-v="search"]').classList.add('on');
+  $('view-search').classList.add('active');document.querySelector('[data-v="search"]').classList.add('on');
   $('cnt').scrollTop=0;
 });
 
-// ═══ SORT SHEET ═════════════════════════════════════════
+// ══ СОРТИРОВКА ══════════════════════════════════════════════
 $('sopen').addEventListener('click',()=>{$('sov').classList.add('on');$('ssh').classList.add('on');});
 $('sov').addEventListener('click',()=>{$('sov').classList.remove('on');$('ssh').classList.remove('on');loadLots(0);});
 document.querySelectorAll('#sfld .sc2').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('#sfld .sc2').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.sort.f=b.dataset.f;});});
 document.querySelectorAll('.db').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.db').forEach(x=>x.classList.remove('on'));b.classList.add('on');S.sort.d=b.dataset.d;});});
 
-// ═══ FILTER SHEET ═══════════════════════════════════════
+// ══ РЕДКОСТЬ (для артефактов) ════════════════════════════════
+function buildRarList(){
+  const rl=$('rlist');rl.innerHTML='';
+  ART_RARITIES.forEach(r=>{
+    const on=r.q.some(qv=>S.rarFilter.includes(qv));
+    const item=document.createElement('div');item.className=`ritem${on?' on':''}`;item.style.color=r.c;
+    item.innerHTML=`<div class="rchk"><svg class="rchi" viewBox="0 0 10 10" fill="none"><polyline points="1.5 5 4 7.5 8.5 2.5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span>${r.n}</span>`;
+    item.addEventListener('click',()=>{
+      r.q.forEach(qv=>{const idx=S.rarFilter.indexOf(qv);idx>=0?S.rarFilter.splice(idx,1):S.rarFilter.push(qv);});
+      item.classList.toggle('on',r.q.some(qv=>S.rarFilter.includes(qv)));
+      // Update button state
+      $('ropen').classList.toggle('on',S.rarFilter.length>0);
+    });
+    rl.appendChild(item);
+  });
+}
+$('ropen').addEventListener('click',()=>{buildRarList();$('rov').classList.add('on');$('rsh').classList.add('on');});
+$('rov').addEventListener('click',()=>{$('rov').classList.remove('on');$('rsh').classList.remove('on');});
+$('rap').addEventListener('click',()=>{$('rov').classList.remove('on');$('rsh').classList.remove('on');loadLots(0);});
+
+// ══ ФИЛЬТРЫ (поиск предметов) ═══════════════════════════════
 function buildCatGrid(){
   const cg=$('cg');
   Object.entries(CATS).forEach(([k,v])=>{
     const b=document.createElement('button');b.className='cb';b.dataset.k=k;b.textContent=v;
-    b.addEventListener('click',()=>{S.flt.cat=S.flt.cat===k?'':k;cg.querySelectorAll('.cb').forEach(x=>x.classList.toggle('on',x.dataset.k===S.flt.cat));buildRarList();});
+    b.addEventListener('click',()=>{S.flt.cat=S.flt.cat===k?'':k;cg.querySelectorAll('.cb').forEach(x=>x.classList.toggle('on',x.dataset.k===S.flt.cat));});
     cg.appendChild(b);
-  });
-}
-
-function buildRarList(){
-  const rl=$('rl'),hint=$('rhint');
-  rl.innerHTML='';
-  const cat=S.flt.cat||'misc',list=getRars(cat);
-  hint.textContent=isArt(cat)?'Редкости артефактов':'Ранги предметов';
-  list.forEach(r=>{
-    const on=S.flt.rars.some(x=>r.q.includes(x));
-    const item=document.createElement('div');item.className=`ri${on?' on':''}`;item.style.color=r.c;
-    item.innerHTML=`<div class="rck"><svg class="rcki" viewBox="0 0 10 10" fill="none"><polyline points="1.5 5 4 7.5 8.5 2.5" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="rn">${r.n}</span>`;
-    item.addEventListener('click',()=>{
-      r.q.forEach(qv=>{const idx=S.flt.rars.indexOf(qv);idx>=0?S.flt.rars.splice(idx,1):S.flt.rars.push(qv);});
-      item.classList.toggle('on',S.flt.rars.some(x=>r.q.includes(x)));
-    });
-    rl.appendChild(item);
   });
 }
 
 function openFilter(){
   $('cg').querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.dataset.k===S.flt.cat));
-  buildRarList();
   $('esl').value=S.flt.enh<0?-1:S.flt.enh;
   $('ev').textContent=S.flt.enh<0?'Любая':`+${S.flt.enh}`;
   $('ecl').style.display=S.flt.enh>=0?'block':'none';
@@ -591,35 +650,33 @@ function openFilter(){
   $('fov').classList.add('on');$('fsh').classList.add('on');
 }
 function closeFilter(){$('fov').classList.remove('on');$('fsh').classList.remove('on');}
-
 $('fopen').addEventListener('click',openFilter);
 $('fov').addEventListener('click',closeFilter);
 $('fsap').addEventListener('click',()=>{
   S.flt.qf=parseInt($('qf').value)||null;S.flt.qt=parseInt($('qt').value)||null;
   closeFilter();searchItems($('sq').value,S.flt.cat);
 });
-
 const esl=$('esl'),ev=$('ev'),ecl=$('ecl');
 esl.addEventListener('input',()=>{const v=parseInt(esl.value);S.flt.enh=v;ev.textContent=v<0?'Любая':`+${v}`;ecl.style.display=v>=0?'block':'none';});
 ecl.addEventListener('click',()=>{esl.value=-1;S.flt.enh=-1;ev.textContent='Любая';ecl.style.display='none';});
 
-// ═══ FAVORITES / RECENT ═════════════════════════════════
+// ══ ИЗБРАННОЕ / НЕДАВНИЕ ═════════════════════════════════════
 $('cfav').addEventListener('click',()=>{
   S.favMode=!S.favMode;S.recMode=false;
-  $('cfav').classList.toggle('on',S.favMode);$('crecent').classList.remove('on');
+  $('cfav').classList.toggle('on',S.favMode);$('crec').classList.remove('on');
   S.favMode?searchItems('','',getFavs()):searchItems($('sq').value,S.flt.cat);
 });
-$('crecent').addEventListener('click',()=>{
+$('crec').addEventListener('click',()=>{
   S.recMode=!S.recMode;S.favMode=false;
-  $('crecent').classList.toggle('on',S.recMode);$('cfav').classList.remove('on');
+  $('crec').classList.toggle('on',S.recMode);$('cfav').classList.remove('on');
   S.recMode?searchItems('','',null,getRec()):searchItems($('sq').value,S.flt.cat);
 });
 
-// ═══ AUTO-SEARCH ════════════════════════════════════════
-const debS=deb(q=>{S.favMode=false;S.recMode=false;$('cfav').classList.remove('on');$('crecent').classList.remove('on');searchItems(q,S.flt.cat);},450);
+// ══ АВТОПОИСК ═══════════════════════════════════════════════
+const debS=deb(q=>{S.favMode=false;S.recMode=false;$('cfav').classList.remove('on');$('crec').classList.remove('on');searchItems(q,S.flt.cat);},450);
 $('sq').addEventListener('input',e=>debS(e.target.value));
 
-// ═══ HISTORY ════════════════════════════════════════════
+// ══ ИСТОРИЯ ═════════════════════════════════════════════════
 async function loadHist(q){
   if(!q.trim())return;
   const c=$('hc');c.innerHTML='<div class="empty"><div class="spin"></div></div>';
@@ -628,12 +685,11 @@ async function loadHist(q){
     if(!items.length){c.innerHTML=`<div class="empty"><div class="et">Не найдено</div></div>`;return;}
     const item=items[0];
     const data=await fetch(`${BACKEND}/api/history/${item.id}`).then(r=>r.json());
-    if(!data.records?.length){c.innerHTML=`<div class="empty"><div class="et">${item.name}</div><div class="es">История пуста</div></div>`;return;}
-    renderHist(data,item.category||'misc');
-  }catch(e){c.innerHTML=`<div class="empty"><div class="et">Ошибка</div></div>`;}
+    if(!data.records?.length){c.innerHTML=`<div class="empty"><div class="et">${item.name||item.id}</div><div class="es">История пуста</div></div>`;return;}
+    renderHist(data);
+  }catch{c.innerHTML=`<div class="empty"><div class="et">Ошибка</div></div>`;}
 }
-
-function renderHist(data,cat){
+function renderHist(data){
   const c=$('hc'),s=data.stats||{};
   c.innerHTML=`<div style="padding:0 10px 6px"><div style="font-size:15px;font-weight:700;color:var(--tx)">${data.item_name}</div><div style="font-size:11px;color:var(--t3)">${data.records.length} продаж</div></div>
   <div class="cw"><div class="cc"><canvas id="pc"></canvas></div></div>
@@ -655,7 +711,7 @@ const debH=deb(loadHist,500);
 $('hq').addEventListener('input',e=>debH(e.target.value));
 $('hq').addEventListener('keydown',e=>{if(e.key==='Enter')loadHist(e.target.value);});
 
-// ═══ SETTINGS ═══════════════════════════════════════════
+// ══ НАСТРОЙКИ ═══════════════════════════════════════════════
 function syncCfg(){
   $('ntf').checked=S.cfg.notif;
   $('iv').textContent=S.cfg.ipp;
@@ -667,8 +723,8 @@ $('ip').addEventListener('click',()=>{if(S.cfg.ipp<20){S.cfg.ipp++;syncCfg();}})
 $('tm').addEventListener('click',()=>{if(S.cfg.thr>5){S.cfg.thr-=5;syncCfg();}});
 $('tp').addEventListener('click',()=>{if(S.cfg.thr<50){S.cfg.thr+=5;syncCfg();}});
 
-// ═══ BOOT ════════════════════════════════════════════════
-buildCatGrid();buildRarList();syncCfg();
+// ══ ЗАПУСК ══════════════════════════════════════════════════
+buildCatGrid();syncCfg();
 searchItems('','');
 </script>
 </body>
