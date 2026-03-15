@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>STALCRAFT Auction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* ══ RESET ════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Rajdhani',sans-serif}
+button{cursor:pointer;border:none;background:none;font-family:inherit}
+input{font-family:'JetBrains Mono',monospace}
+
+/* ══ TOKENS ═══════════════════════════════════════════════════════ */
+:root{
+  --bg:       #0a0b0d;
+  --bg1:      #111318;
+  --bg2:      #181b22;
+  --bg3:      #1e2230;
+  --border:   #252a38;
+  --border2:  #2e3448;
+  --accent:   #c8ff47;
+  --accent2:  #9bcc20;
+  --accent-dim: rgba(200,255,71,.1);
+  --text:     #e8eaf0;
+  --text2:    #7a8099;
+  --text3:    #4a5070;
+  --danger:   #ff4b4b;
+  --success:  #4bff9a;
+  --nav-h:    60px;
+  --safe-b:   env(safe-area-inset-bottom, 0px);
+  /* rarities */
+  --rw: #8a8fa8;  /* white  */
+  --rg: #4ade80;  /* green  */
+  --rb: #60a5fa;  /* blue   */
+  --rr: #f97474;  /* red    */
+  --ry: #fbbf24;  /* yellow */
+}
+
+/* ══ LAYOUT ═══════════════════════════════════════════════════════ */
+#app{
+  position:fixed;inset:0;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+#content{
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  scroll-behavior:smooth;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 8px);
+}
+#content::-webkit-scrollbar{display:none}
+
+/* ══ NAV BAR ══════════════════════════════════════════════════════ */
+#navbar{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(var(--nav-h) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  background:var(--bg1);
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;
+  z-index:100;
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;padding:8px 0;
+  color:var(--text3);transition:color .15s;
+}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:20px;height:20px;transition:transform .15s}
+.nav-btn.active svg{transform:scale(1.1)}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+
+/* ══ VIEWS ════════════════════════════════════════════════════════ */
+.view{display:none;animation:fadeIn .18s ease}
+.view.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ══ HEADER ═══════════════════════════════════════════════════════ */
+.view-header{
+  position:sticky;top:0;z-index:50;
+  background:var(--bg);
+  padding:14px 16px 0;
+  border-bottom:1px solid var(--border);
+  padding-bottom:0;
+}
+.view-title{
+  font-size:11px;font-weight:600;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text3);
+  margin-bottom:10px;
+}
+
+/* ══ SEARCH BAR ═══════════════════════════════════════════════════ */
+.search-bar{
+  display:flex;gap:8px;margin-bottom:12px;
+}
+.search-input-wrap{
+  flex:1;position:relative;
+}
+.search-input-wrap svg{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;width:16px;height:16px;
+}
+.search-input{
+  width:100%;height:38px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;
+  padding:0 10px 0 32px;
+  color:var(--text);font-size:14px;outline:none;
+  transition:border-color .15s;
+}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text3)}
+
+/* ══ FILTER CHIPS ═════════════════════════════════════════════════ */
+.filter-row{
+  display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;
+  scrollbar-width:none;
+}
+.filter-row::-webkit-scrollbar{display:none}
+.chip{
+  flex-shrink:0;height:28px;padding:0 10px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:4px;color:var(--text2);
+  font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:.03em;white-space:nowrap;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
+}
+.chip.active{
+  background:var(--accent-dim);border-color:var(--accent);
+  color:var(--accent);
+}
+.chip-dot{width:6px;height:6px;border-radius:50%}
+
+/* Sort chip special */
+.chip-sort{min-width:90px;justify-content:space-between}
+
+/* ══ LOT CARD ═════════════════════════════════════════════════════ */
+.card-list{padding:8px 12px 0;}
+.lot-card{
+  position:relative;
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:6px;
+  margin-bottom:8px;
+  overflow:hidden;
+  display:flex;
+  transition:border-color .15s,transform .1s;
+  animation:slideIn .2s ease both;
+}
+.lot-card:active{transform:scale(.99)}
+.lot-card:hover{border-color:var(--border2)}
+@keyframes slideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card-accent{width:3px;flex-shrink:0}
+.rq-0 .card-accent{background:var(--rw)}
+.rq-1 .card-accent{background:var(--rg)}
+.rq-2 .card-accent{background:var(--rb)}
+.rq-3 .card-accent,.rq-4 .card-accent{background:var(--rr)}
+.rq-5 .card-accent{background:var(--ry)}
+
+.card-body{flex:1;padding:10px 12px}
+.card-name{
+  font-size:15px;font-weight:700;color:var(--text);
+  margin-bottom:2px;line-height:1.2;
+}
+.card-meta{
+  display:flex;flex-wrap:wrap;gap:4px 10px;
+  margin-top:6px;
+}
+.card-tag{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text2);
+  display:flex;align-items:center;gap:4px;
+}
+.card-tag svg{width:11px;height:11px;opacity:.6}
+.card-price-row{
+  display:flex;align-items:baseline;justify-content:space-between;
+  margin-top:8px;
+}
+.card-price{
+  font-family:'JetBrains Mono',monospace;
+  font-size:16px;font-weight:500;color:var(--accent);
+}
+.card-price-secondary{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--text3);
+}
+.card-right{
+  display:flex;flex-direction:column;justify-content:space-between;
+  align-items:flex-end;padding:10px 10px 10px 0;
+  min-width:72px;
+}
+.card-time{
+  font-size:11px;color:var(--text3);
+  font-family:'JetBrains Mono',monospace;
+  text-align:right;
+}
+.card-time.urgent{color:var(--danger)}
+
+/* Discount badge */
+.discount-badge{
+  background:rgba(75,255,154,.12);
+  border:1px solid rgba(75,255,154,.3);
+  color:var(--success);
+  font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  padding:2px 6px;border-radius:3px;
+  white-space:nowrap;
+}
+
+/* Enh badge */
+.enh-badge{
+  font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  color:#ffd700;padding:1px 5px;
+  border:1px solid rgba(255,215,0,.3);border-radius:2px;
+  background:rgba(255,215,0,.08);
+}
+
+/* ══ SKELETON ═════════════════════════════════════════════════════ */
+.skeleton{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:6px;margin-bottom:8px;padding:14px 12px;
+  overflow:hidden;position:relative;
+}
+.skeleton::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.04) 50%,transparent 100%);
+  animation:shimmer 1.4s infinite;
+}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.skel-line{height:12px;border-radius:3px;background:var(--bg3);margin-bottom:8px}
+.skel-line.w80{width:80%}
+.skel-line.w50{width:50%}
+.skel-line.w30{width:30%}
+
+/* ══ EMPTY STATE ══════════════════════════════════════════════════ */
+.empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:60px 24px;gap:12px;
+  color:var(--text3);text-align:center;
+}
+.empty svg{opacity:.25;width:48px;height:48px}
+.empty-title{font-size:16px;font-weight:600;color:var(--text2)}
+.empty-sub{font-size:13px;line-height:1.6}
+
+/* ══ ACTION BTNS ══════════════════════════════════════════════════ */
+.action-row{
+  display:flex;gap:8px;padding:8px 12px;
+  position:sticky;top:calc(var(--header-h));z-index:40;
+  background:var(--bg);
+}
+.btn{
+  flex:1;height:40px;border-radius:6px;
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .15s;
+}
+.btn-primary{
+  background:var(--accent);color:#0a0b0d;
+}
+.btn-primary:active{background:var(--accent2)}
+.btn-ghost{
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text2);
+}
+.btn-ghost:active{background:var(--bg3);border-color:var(--border2)}
+.btn svg{width:14px;height:14px}
+
+/* ══ BOTTOM SHEET ═════════════════════════════════════════════════ */
+#sheet-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:200;opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+#sheet-overlay.open{opacity:1;pointer-events:all}
+#sheet{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg1);border-radius:16px 16px 0 0;
+  border-top:1px solid var(--border2);
+  z-index:201;
+  transform:translateY(100%);
+  transition:transform .25s cubic-bezier(.32,1,.68,1);
+  max-height:80vh;overflow-y:auto;
+  padding-bottom:calc(24px + var(--safe-b));
+}
+#sheet.open{transform:none}
+.sheet-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--border2);margin:12px auto;
+}
+.sheet-title{
+  font-size:11px;font-weight:700;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--text3);
+  padding:0 16px 12px;
+}
+.sheet-section{
+  padding:0 16px 16px;
+  border-bottom:1px solid var(--border);
+}
+.sheet-section:last-child{border-bottom:none}
+.sheet-label{
+  font-size:12px;font-weight:600;color:var(--text2);
+  letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:8px;margin-top:14px;
+}
+
+/* Category grid */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cat-btn{
+  padding:10px 6px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;text-align:center;
+  font-size:12px;font-weight:600;color:var(--text2);
+  transition:all .15s;line-height:1.3;
+}
+.cat-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* Rarity row */
+.rar-row{display:flex;gap:8px}
+.rar-btn{
+  flex:1;height:36px;border-radius:4px;
+  border:2px solid transparent;font-size:18px;
+  transition:all .15s;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;
+}
+.rar-btn.active{border-color:currentColor;transform:scale(1.05)}
+.rar-btn[data-r="white"]{color:var(--rw)}
+.rar-btn[data-r="green"]{color:var(--rg)}
+.rar-btn[data-r="blue"] {color:var(--rb)}
+.rar-btn[data-r="red"]  {color:var(--rr)}
+.rar-btn[data-r="yellow"]{color:var(--ry)}
+
+/* Enhancement pills */
+.enh-grid{display:flex;flex-wrap:wrap;gap:5px}
+.enh-btn{
+  width:42px;height:28px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:4px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  font-weight:500;color:var(--text2);transition:all .15s;
+}
+.enh-btn.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* Sort options */
+.sort-list{display:flex;flex-direction:column;gap:4px}
+.sort-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;font-size:14px;font-weight:600;color:var(--text2);
+  transition:all .15s;
+}
+.sort-item.active{border-color:var(--accent);color:var(--accent)}
+.sort-dir{font-size:14px}
+
+/* Text inputs in sheet */
+.sheet-input{
+  width:100%;height:40px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:6px;
+  padding:0 12px;color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:13px;outline:none;transition:border-color .15s;
+}
+.sheet-input:focus{border-color:var(--accent)}
+.sheet-input::placeholder{color:var(--text3)}
+
+/* Apply btn */
+.sheet-apply{
+  width:calc(100% - 32px);margin:16px;height:44px;
+  background:var(--accent);color:#0a0b0d;
+  font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;border-radius:8px;
+  transition:background .15s;
+}
+.sheet-apply:active{background:var(--accent2)}
+
+/* ══ CHART VIEW ═══════════════════════════════════════════════════ */
+#view-history .view-header{padding-bottom:0}
+.history-search{padding:10px 12px 8px}
+.chart-wrap{
+  margin:0 12px;
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:8px;padding:14px;
+}
+.chart-canvas-wrap{position:relative;height:180px}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:8px;
+  padding:10px 12px;
+}
+.stat-card{
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:6px;padding:10px 12px;
+}
+.stat-label{font-size:10px;color:var(--text3);font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:15px;
+  font-weight:500;color:var(--accent)}
+.stat-value.muted{color:var(--text2)}
+
+/* ══ SETTINGS VIEW ════════════════════════════════════════════════ */
+.settings-list{padding:8px 12px}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 14px;
+  background:var(--bg1);border:1px solid var(--border);
+  border-radius:6px;margin-bottom:8px;
+}
+.setting-info{flex:1}
+.setting-name{font-size:15px;font-weight:600;color:var(--text)}
+.setting-desc{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* Toggle */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-track{
+  position:absolute;inset:0;background:var(--bg3);
+  border-radius:12px;border:1px solid var(--border2);
+  cursor:pointer;transition:all .2s;
+}
+.toggle input:checked + .toggle-track{
+  background:var(--accent-dim);border-color:var(--accent);
+}
+.toggle-thumb{
+  position:absolute;width:18px;height:18px;
+  background:var(--text3);border-radius:50%;
+  top:2px;left:2px;transition:all .2s;pointer-events:none;
+}
+.toggle input:checked ~ .toggle-thumb{
+  transform:translateX(20px);background:var(--accent);
+}
+
+/* IPP stepper */
+.stepper{display:flex;align-items:center;gap:12px}
+.step-btn{
+  width:32px;height:32px;border-radius:6px;
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--text);font-size:18px;font-weight:500;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.step-btn:active{background:var(--bg3)}
+.step-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:16px;font-weight:500;color:var(--accent);
+  min-width:24px;text-align:center;
+}
+
+/* ══ LOAD MORE ════════════════════════════════════════════════════ */
+.load-more-btn{
+  width:calc(100% - 24px);margin:0 12px 12px;height:40px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;color:var(--text2);
+  font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:600;
+  letter-spacing:.05em;text-transform:uppercase;
+  transition:all .15s;
+}
+.load-more-btn:active{background:var(--bg3)}
+
+/* ══ TABS COUNT ═══════════════════════════════════════════════════ */
+.tab-badge{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;background:var(--accent);color:#0a0b0d;
+  border-radius:8px;padding:1px 5px;margin-left:4px;
+  font-weight:700;
+}
+
+/* ══ LOADING SPINNER ══════════════════════════════════════════════ */
+.spinner{
+  display:inline-block;width:20px;height:20px;
+  border:2px solid var(--border2);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ══ TOAST ════════════════════════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 12px);
+  left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg2);border:1px solid var(--border2);
+  color:var(--text);font-size:13px;font-weight:600;
+  padding:8px 16px;border-radius:20px;
+  opacity:0;transition:all .2s;pointer-events:none;
+  white-space:nowrap;z-index:300;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ══ RARITY RING ══════════════════════════════════════════════════ */
+.card-rarity-ring{
+  font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;
+  padding:1px 5px;border-radius:2px;margin-right:2px;
+}
+.rq-ring-0{color:var(--rw);border:1px solid rgba(138,143,168,.3);background:rgba(138,143,168,.08)}
+.rq-ring-1{color:var(--rg);border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.08)}
+.rq-ring-2{color:var(--rb);border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.08)}
+.rq-ring-3,.rq-ring-4{color:var(--rr);border:1px solid rgba(249,116,116,.3);background:rgba(249,116,116,.08)}
+.rq-ring-5{color:var(--ry);border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.08)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ CONTENT ══════════════════════════════════════════════════ -->
+  <div id="content">
+
+    <!-- ── VIEW: SEARCH ─────────────────────────────────────────── -->
+    <div id="view-search" class="view active">
+      <div class="view-header" id="search-header">
+        <div class="view-title">Аукцион — STALCRAFT</div>
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" id="main-search" type="text" placeholder="Название предмета...">
+          </div>
+          <button class="btn btn-ghost" id="filter-btn" style="flex:none;width:38px;padding:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z"/></svg>
+          </button>
+        </div>
+        <div class="filter-row" id="filter-chips"></div>
+      </div>
+      <div class="action-row">
+        <button class="btn btn-primary" id="search-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Найти
+        </button>
+        <button class="btn btn-ghost" id="profitable-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Выгодные
+        </button>
+      </div>
+      <div id="lot-list" class="card-list"></div>
+      <div id="load-more-wrap"></div>
+    </div>
+
+    <!-- ── VIEW: DEALS ──────────────────────────────────────────── -->
+    <div id="view-deals" class="view">
+      <div class="view-header">
+        <div class="view-title">Выгодные предметы</div>
+        <div class="search-bar">
+          <div class="search-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" id="deals-search" type="text" placeholder="Фильтр по предмету...">
+          </div>
+        </div>
+      </div>
+      <div id="deals-list" class="card-list" style="padding-top:10px"></div>
+    </div>
+
+    <!-- ── VIEW: HISTORY ────────────────────────────────────────── -->
+    <div id="view-history" class="view">
+      <div class="view-header">
+        <div class="view-title">История продаж</div>
+        <div class="history-search">
+          <div class="search-input-wrap" style="width:100%">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input class="search-input" id="history-search" type="text" placeholder="Название предмета...">
+          </div>
+        </div>
+      </div>
+      <div id="history-content" style="padding-top:8px">
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <div class="empty-title">История продаж</div>
+          <div class="empty-sub">Введи название предмета<br>для просмотра графика цен</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: SETTINGS ───────────────────────────────────────── -->
+    <div id="view-settings" class="view">
+      <div class="view-header"><div class="view-title">Настройки</div></div>
+      <div class="settings-list" style="padding-top:12px">
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Уведомления</div>
+            <div class="setting-desc">Уведомлять о новых лотах по фильтрам</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="notif-toggle">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Лотов на страницу</div>
+            <div class="setting-desc">Количество результатов за раз</div>
+          </div>
+          <div class="stepper">
+            <button class="step-btn" id="ipp-minus">−</button>
+            <div class="step-val" id="ipp-val">10</div>
+            <button class="step-btn" id="ipp-plus">+</button>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-name">Порог выгоды</div>
+            <div class="setting-desc">Скидка от медианы для «Выгодных»</div>
+          </div>
+          <div class="stepper">
+            <button class="step-btn" id="thr-minus">−</button>
+            <div class="step-val" id="thr-val">20<span style="font-size:10px;opacity:.5">%</span></div>
+            <button class="step-btn" id="thr-plus">+</button>
+          </div>
+        </div>
+
+        <div style="padding:8px 2px">
+          <div class="setting-desc" style="line-height:1.7">
+            <span style="color:var(--accent)">v2.0</span> — STALCRAFT Auction Mini App<br>
+            Данные предоставлены Stalcraft API (EXBO)
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- ══ NAVBAR ═══════════════════════════════════════════════════ -->
+  <div id="navbar">
+    <button class="nav-btn active" data-view="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <span class="nav-label">Поиск</span>
+    </button>
+    <button class="nav-btn" data-view="deals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span class="nav-label">Выгодные</span>
+    </button>
+    <button class="nav-btn" data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="nav-label">История</span>
+    </button>
+    <button class="nav-btn" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span class="nav-label">Настройки</span>
+    </button>
+  </div>
+
+  <!-- ══ FILTER SHEET ══════════════════════════════════════════════ -->
+  <div id="sheet-overlay"></div>
+  <div id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Фильтры</div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Категория</div>
+      <div class="cat-grid" id="cat-grid"></div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Редкость</div>
+      <div class="rar-row">
+        <button class="rar-btn" data-r="white">⬜</button>
+        <button class="rar-btn" data-r="green">🟩</button>
+        <button class="rar-btn" data-r="blue">🟦</button>
+        <button class="rar-btn" data-r="red">🟥</button>
+        <button class="rar-btn" data-r="yellow">🟨</button>
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Заточка</div>
+      <div class="enh-grid" id="enh-grid"></div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Количество в стаке</div>
+      <div style="display:flex;gap:8px">
+        <input class="sheet-input" id="qty-from" type="number" placeholder="От" min="1">
+        <input class="sheet-input" id="qty-to"   type="number" placeholder="До" min="1">
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Ник продавца</div>
+      <input class="sheet-input" id="seller-input" type="text" placeholder="Введи ник...">
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-label">Сортировка</div>
+      <div class="sort-list" id="sort-list"></div>
+    </div>
+
+    <button class="sheet-apply" id="sheet-apply">Применить</button>
+  </div>
+
+  <!-- ══ TOAST ═════════════════════════════════════════════════════ -->
+  <div id="toast"></div>
+</div><!-- /app -->
+
+<script>
+// ══ CONFIG ═══════════════════════════════════════════════════════
+const BACKEND = 'https://YOUR_SERVER_URL';  // ← замени на URL своего сервера
+
+// ══ TELEGRAM INIT ════════════════════════════════════════════════
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#0a0b0d');
+  tg.setBackgroundColor('#0a0b0d');
+}
+const USER_ID = tg?.initDataUnsafe?.user?.id?.toString() || 'guest';
+
+// ══ STATE ════════════════════════════════════════════════════════
+const state = {
+  filters: {
+    q: '', category: '', rarity: '', enhancement: '',
+    qty_from: null, qty_to: null, seller: '',
+    sort: 'price', sort_asc: true,
+  },
+  search: { lots: [], total: 0, page: 0, pages: 1, loading: false },
+  deals:  { lots: [], loading: false },
+  history:{ records: [], stats: {}, itemName: '', itemId: '', loading: false },
+  settings: { notifications: false, items_per_page: 10, threshold: 20 },
+  chart: null,
+};
+
+const CATEGORIES = {
+  artifact:   '💎 Артефакты',
+  armor:      '🧥 Костюмы',
+  weapon:     '🔫 Оружие',
+  attachment: '🔧 Обвесы',
+  consumable: '💊 Расходники',
+  ammo:       '🔴 Боеприпасы',
+  medicine:   '🩹 Медикаменты',
+  container:  '📦 Контейнеры',
+  misc:       '📁 Прочее',
+};
+const RARITY_NAMES = {
+  0:'Обычный', 1:'Необычный', 2:'Особый',
+  3:'Редкий', 4:'Исключительный', 5:'Легендарный'
+};
+const SORT_OPTS = [
+  {k:'price',    l:'💰 Цена выкупа'},
+  {k:'bid',      l:'🏷 Начальная ставка'},
+  {k:'time',     l:'⏱ Время лота'},
+  {k:'per_unit', l:'📊 Цена за штуку'},
+];
+
+// ══ UTILS ════════════════════════════════════════════════════════
+const fmtPrice = v => {
+  if (!v && v !== 0) return '—';
+  return v.toLocaleString('ru-RU') + ' ₽';
+};
+const $ = id => document.getElementById(id);
+const toast = (msg, dur=2200) => {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+};
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+
+// ══ NAV ══════════════════════════════════════════════════════════
+let currentView = 'search';
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.view;
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $(`view-${v}`).classList.add('active');
+    btn.classList.add('active');
+    currentView = v;
+    $('content').scrollTop = 0;
+    if (v === 'deals' && state.deals.lots.length === 0) loadDeals();
+  });
+});
+
+// ══ FILTER SHEET INIT ════════════════════════════════════════════
+function initSheet() {
+  // Categories
+  const catGrid = $('cat-grid');
+  Object.entries(CATEGORIES).forEach(([k, v]) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn';
+    btn.dataset.k = k;
+    btn.textContent = v;
+    btn.addEventListener('click', () => {
+      state.filters.category = (state.filters.category === k) ? '' : k;
+      renderChips();
+      catGrid.querySelectorAll('.cat-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.k === state.filters.category));
+    });
+    catGrid.appendChild(btn);
+  });
+
+  // Rarities
+  document.querySelectorAll('.rar-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.filters.rarity = (state.filters.rarity === btn.dataset.r) ? '' : btn.dataset.r;
+      renderChips();
+      document.querySelectorAll('.rar-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.r === state.filters.rarity));
+    });
+  });
+
+  // Enhancement
+  const enhGrid = $('enh-grid');
+  for (let i = 0; i <= 15; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'enh-btn';
+    btn.dataset.v = i;
+    btn.textContent = `+${i}`;
+    btn.addEventListener('click', () => {
+      state.filters.enhancement = (state.filters.enhancement == i) ? '' : String(i);
+      renderChips();
+      enhGrid.querySelectorAll('.enh-btn').forEach(b =>
+        b.classList.toggle('active', b.dataset.v == state.filters.enhancement));
+    });
+    enhGrid.appendChild(btn);
+  }
+
+  // Sort
+  const sortList = $('sort-list');
+  SORT_OPTS.forEach(opt => {
+    const el = document.createElement('button');
+    el.className = 'sort-item';
+    el.dataset.k = opt.k;
+    el.innerHTML = `<span>${opt.l}</span><span class="sort-dir"></span>`;
+    el.addEventListener('click', () => {
+      if (state.filters.sort === opt.k) {
+        state.filters.sort_asc = !state.filters.sort_asc;
+      } else {
+        state.filters.sort = opt.k;
+        state.filters.sort_asc = true;
+      }
+      renderChips();
+      syncSortUI();
+    });
+    sortList.appendChild(el);
+  });
+
+  // Overlay close
+  $('sheet-overlay').addEventListener('click', closeSheet);
+  $('sheet-apply').addEventListener('click', () => {
+    state.filters.qty_from = parseInt($('qty-from').value) || null;
+    state.filters.qty_to   = parseInt($('qty-to').value)   || null;
+    state.filters.seller   = $('seller-input').value.trim();
+    renderChips();
+    closeSheet();
+    doSearch();
+  });
+
+  $('filter-btn').addEventListener('click', openSheet);
+}
+
+function syncSortUI() {
+  document.querySelectorAll('.sort-item').forEach(el => {
+    const active = el.dataset.k === state.filters.sort;
+    el.classList.toggle('active', active);
+    el.querySelector('.sort-dir').textContent = active
+      ? (state.filters.sort_asc ? '⬆' : '⬇') : '';
+  });
+}
+
+function openSheet() {
+  // Sync sheet state
+  document.querySelectorAll('.cat-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.k === state.filters.category));
+  document.querySelectorAll('.rar-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.r === state.filters.rarity));
+  document.querySelectorAll('.enh-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.v == state.filters.enhancement));
+  $('qty-from').value = state.filters.qty_from || '';
+  $('qty-to').value   = state.filters.qty_to   || '';
+  $('seller-input').value = state.filters.seller || '';
+  syncSortUI();
+  $('sheet').classList.add('open');
+  $('sheet-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  $('sheet').classList.remove('open');
+  $('sheet-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ══ FILTER CHIPS ═════════════════════════════════════════════════
+const RARITY_EMOJIS = {white:'⬜',green:'🟩',blue:'🟦',red:'🟥',yellow:'🟨'};
+const RARITY_COLORS = {white:'var(--rw)',green:'var(--rg)',blue:'var(--rb)',red:'var(--rr)',yellow:'var(--ry)'};
+
+function renderChips() {
+  const row = $('filter-chips');
+  row.innerHTML = '';
+  const f = state.filters;
+  const chips = [];
+
+  if (f.category) chips.push({l: CATEGORIES[f.category], k:'category', clear:()=>{ f.category=''; }});
+  if (f.rarity)   chips.push({l: RARITY_EMOJIS[f.rarity], k:'rarity',
+    style:`color:${RARITY_COLORS[f.rarity]}`, clear:()=>{ f.rarity=''; }});
+  if (f.enhancement !== '') chips.push({l:`+${f.enhancement}`, k:'enh', clear:()=>{ f.enhancement=''; }});
+  if (f.qty_from || f.qty_to) chips.push({l:`${f.qty_from||''}–${f.qty_to||''}`, k:'qty',
+    clear:()=>{ f.qty_from=null; f.qty_to=null; }});
+  if (f.seller) chips.push({l:`👤 ${f.seller}`, k:'seller', clear:()=>{ f.seller=''; }});
+  const sortOpt = SORT_OPTS.find(o=>o.k===f.sort);
+  chips.push({l: `${sortOpt?.l} ${f.sort_asc?'⬆':'⬇'}`, k:'sort', clear:null, noX:true});
+
+  chips.forEach(chip => {
+    const el = document.createElement('button');
+    el.className = 'chip' + (chip.k !== 'sort' ? ' active' : '');
+    el.textContent = chip.l;
+    if (chip.style) el.style.cssText = chip.style + ';border-color:currentColor';
+    if (!chip.noX && chip.clear) {
+      el.textContent = '';
+      el.innerHTML = `${chip.l} <span style="opacity:.5;font-size:10px">✕</span>`;
+      el.addEventListener('click', () => { chip.clear(); renderChips(); });
+    }
+    row.appendChild(el);
+  });
+}
+
+// ══ API CALLS ════════════════════════════════════════════════════
+async function apiFetch(path) {
+  const r = await fetch(BACKEND + path);
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+
+function buildLotsUrl(page = 0) {
+  const f = state.filters;
+  const s = state.settings;
+  const p = new URLSearchParams();
+  if (f.q)          p.set('q', f.q);
+  if (f.category)   p.set('category', f.category);
+  if (f.rarity)     p.set('rarity', f.rarity);
+  if (f.enhancement !== '') p.set('enhancement', f.enhancement);
+  if (f.qty_from)   p.set('qty_from', f.qty_from);
+  if (f.qty_to)     p.set('qty_to', f.qty_to);
+  if (f.seller)     p.set('seller', f.seller);
+  p.set('sort', f.sort);
+  p.set('asc', f.sort_asc);
+  p.set('page', page);
+  p.set('per_page', s.items_per_page);
+  return `/api/lots?${p}`;
+}
+
+// ══ RENDER LOT CARD ══════════════════════════════════════════════
+function renderCard(lot, showDiscount = false) {
+  const q     = lot._quality ?? 0;
+  const name  = lot._name || '—';
+  const price = lot.buyoutPrice || lot.startPrice || 0;
+  const bid   = lot.startPrice || 0;
+  const time  = lot._timeLeft || '—';
+  const amt   = lot.amount || 1;
+  const enh   = lot._enh || 0;
+  const pu    = lot._perUnit;
+  const seller= lot.sellerName || lot.seller || '—';
+  const urgent= ['м','д'].some(s => time.includes(s) && parseInt(time) < 30 && time.includes('м'));
+
+  const card = document.createElement('div');
+  card.className = `lot-card rq-${q}`;
+
+  let discountHtml = '';
+  if (showDiscount && lot._discount) {
+    discountHtml = `<span class="discount-badge">−${lot._discount}%</span>`;
+  }
+
+  card.innerHTML = `
+    <div class="card-accent"></div>
+    <div class="card-body">
+      <div class="card-name">${name}${enh > 0 ? ` <span class="enh-badge">+${enh}</span>` : ''}</div>
+      <div class="card-meta">
+        <span class="card-rarity-ring rq-ring-${q}">${RARITY_NAMES[q]}</span>
+        ${amt > 1 ? `<span class="card-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>${amt} шт.</span>` : ''}
+        <span class="card-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${seller}</span>
+      </div>
+      <div class="card-price-row">
+        <div>
+          <div class="card-price">${fmtPrice(price)}</div>
+          ${pu ? `<div class="card-price-secondary">${fmtPrice(pu)} / шт</div>` : ''}
+          ${bid && bid !== price ? `<div class="card-price-secondary">Ставка: ${fmtPrice(bid)}</div>` : ''}
+          ${showDiscount && lot._profit_label ? `<div class="card-price-secondary" style="color:var(--success)">${lot._profit_label}</div>` : ''}
+        </div>
+        ${discountHtml}
+      </div>
+    </div>
+    <div class="card-right">
+      <div class="card-time${urgent?' urgent':''}">${time}</div>
+    </div>
+  `;
+  return card;
+}
+
+// ══ SKELETONS ════════════════════════════════════════════════════
+function renderSkeletons(container, n=4) {
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    container.innerHTML += `<div class="skeleton" style="animation-delay:${i*.08}s">
+      <div class="skel-line w80"></div>
+      <div class="skel-line w50"></div>
+      <div class="skel-line w30"></div>
+    </div>`;
+  }
+}
+
+// ══ SEARCH ═══════════════════════════════════════════════════════
+async function doSearch(page = 0) {
+  if (state.search.loading) return;
+  state.search.loading = true;
+  const list = $('lot-list');
+  const lmw  = $('load-more-wrap');
+
+  if (page === 0) {
+    renderSkeletons(list);
+    lmw.innerHTML = '';
+  }
+
+  try {
+    const url  = buildLotsUrl(page);
+    const data = await apiFetch(url);
+    state.search.lots  = page === 0 ? data.lots : [...state.search.lots, ...data.lots];
+    state.search.total = data.total;
+    state.search.pages = data.pages;
+    state.search.page  = page;
+
+    if (page === 0) list.innerHTML = '';
+    data.lots.forEach(lot => list.appendChild(renderCard(lot)));
+
+    if (!data.lots.length && page === 0) {
+      list.innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <div class="empty-title">Лоты не найдены</div>
+        <div class="empty-sub">Попробуй изменить фильтры</div>
+      </div>`;
+    }
+
+    lmw.innerHTML = '';
+    if (page < data.pages - 1) {
+      const btn = document.createElement('button');
+      btn.className = 'load-more-btn';
+      btn.textContent = `Ещё (${data.total - state.search.lots.length} лотов)`;
+      btn.addEventListener('click', () => doSearch(page + 1));
+      lmw.appendChild(btn);
+    }
+  } catch (e) {
+    list.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      <div class="empty-title">Ошибка загрузки</div>
+      <div class="empty-sub">Проверь соединение<br>или перезапусти бота</div>
+    </div>`;
+    toast('Ошибка соединения с сервером');
+  } finally {
+    state.search.loading = false;
+  }
+}
+
+// ══ DEALS ════════════════════════════════════════════════════════
+async function loadDeals(q = '') {
+  if (state.deals.loading) return;
+  state.deals.loading = true;
+  const list = $('deals-list');
+  renderSkeletons(list);
+  try {
+    const f   = state.filters;
+    const par = new URLSearchParams();
+    if (q || f.q)       par.set('q', q || f.q);
+    if (f.category)     par.set('category', f.category);
+    if (f.rarity)       par.set('rarity', f.rarity);
+    const thr = (100 - state.settings.threshold) / 100;
+    par.set('threshold', thr.toFixed(2));
+    const data = await apiFetch(`/api/profitable?${par}`);
+    list.innerHTML = '';
+    if (!data.lots.length) {
+      list.innerHTML = `<div class="empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        <div class="empty-title">Выгодных лотов нет</div>
+        <div class="empty-sub">Рынок устоялся.<br>Проверено ${data.stats?.checked || 0} лотов</div>
+      </div>`;
+    } else {
+      data.lots.forEach(lot => list.appendChild(renderCard(lot, true)));
+    }
+    state.deals.lots = data.lots;
+  } catch (e) {
+    list.innerHTML = `<div class="empty"><div class="empty-title">Ошибка</div></div>`;
+  } finally {
+    state.deals.loading = false;
+  }
+}
+
+// ══ HISTORY ══════════════════════════════════════════════════════
+async function loadHistory(query) {
+  if (!query.trim()) return;
+  state.history.loading = true;
+  const content = $('history-content');
+  content.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+  try {
+    // First find item
+    const items = await apiFetch(`/api/items/search?q=${encodeURIComponent(query)}&limit=1`);
+    if (!items.length) {
+      content.innerHTML = `<div class="empty">
+        <div class="empty-title">Предмет не найден</div>
+        <div class="empty-sub">Попробуй другое название</div>
+      </div>`;
+      return;
+    }
+    const item = items[0];
+    const data = await apiFetch(`/api/history/${item.id}`);
+
+    if (!data.records?.length) {
+      content.innerHTML = `<div class="empty">
+        <div class="empty-title">${item.name}</div>
+        <div class="empty-sub">История продаж пуста</div>
+      </div>`;
+      return;
+    }
+
+    state.history = { ...data, loading: false };
+    renderHistoryView(data);
+  } catch(e) {
+    content.innerHTML = `<div class="empty"><div class="empty-title">Ошибка загрузки</div></div>`;
+  } finally {
+    state.history.loading = false;
+  }
+}
+
+function renderHistoryView(data) {
+  const content = $('history-content');
+  const s = data.stats || {};
+
+  content.innerHTML = `
+    <div style="padding:0 12px 8px">
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:2px">${data.item_name}</div>
+      <div style="font-size:12px;color:var(--text3)">Последние ${data.records.length} продаж</div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-canvas-wrap"><canvas id="price-chart"></canvas></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Минимум</div>
+        <div class="stat-value">${fmtPrice(s.min)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Максимум</div>
+        <div class="stat-value muted">${fmtPrice(s.max)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Среднее</div>
+        <div class="stat-value">${fmtPrice(s.avg)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Медиана</div>
+        <div class="stat-value">${fmtPrice(s.median)}</div>
+      </div>
+    </div>
+  `;
+
+  const ctx = $('price-chart').getContext('2d');
+  if (state.chart) state.chart.destroy();
+
+  const labels = data.records.map(r => {
+    const d = new Date(r.ts);
+    return `${d.getDate()}.${String(d.getMonth()+1).padStart(2,'0')}`;
+  });
+  const prices = data.records.map(r => r.price);
+
+  state.chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: prices,
+        borderColor: '#c8ff47',
+        backgroundColor: ctx => {
+          const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 180);
+          g.addColorStop(0, 'rgba(200,255,71,.2)');
+          g.addColorStop(1, 'rgba(200,255,71,0)');
+          return g;
+        },
+        fill: true,
+        borderWidth: 1.5,
+        pointRadius: 2,
+        pointBackgroundColor: '#c8ff47',
+        tension: 0.4,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e2230',
+          borderColor: '#2e3448',
+          borderWidth: 1,
+          titleColor: '#7a8099',
+          bodyColor: '#c8ff47',
+          bodyFont: { family: 'JetBrains Mono', size: 12 },
+          callbacks: {
+            label: ctx => fmtPrice(ctx.parsed.y),
+          },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#4a5070', font: { size: 10 }, maxRotation: 0 },
+          grid:  { color: 'rgba(37,42,56,.8)', drawBorder: false },
+        },
+        y: {
+          ticks: {
+            color: '#4a5070',
+            font: { family: 'JetBrains Mono', size: 10 },
+            callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M'
+                        : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v,
+          },
+          grid: { color: 'rgba(37,42,56,.8)', drawBorder: false },
+        },
+      },
+    },
+  });
+}
+
+// ══ SETTINGS ═════════════════════════════════════════════════════
+async function loadSettings() {
+  try {
+    const s = await apiFetch(`/api/settings/${USER_ID}`);
+    state.settings.notifications  = s.notifications;
+    state.settings.items_per_page = s.items_per_page;
+    syncSettingsUI();
+  } catch(e) { /* use defaults */ }
+}
+
+async function saveSettings() {
+  try {
+    await fetch(`${BACKEND}/api/settings/${USER_ID}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        notifications: state.settings.notifications,
+        items_per_page: state.settings.items_per_page,
+      }),
+    });
+    toast('Настройки сохранены');
+  } catch(e) { toast('Ошибка сохранения'); }
+}
+
+function syncSettingsUI() {
+  $('notif-toggle').checked = state.settings.notifications;
+  $('ipp-val').innerHTML = String(state.settings.items_per_page);
+  $('thr-val').innerHTML = `${state.settings.threshold}<span style="font-size:10px;opacity:.5">%</span>`;
+}
+
+$('notif-toggle').addEventListener('change', () => {
+  state.settings.notifications = $('notif-toggle').checked;
+  saveSettings();
+});
+
+$('ipp-minus').addEventListener('click', () => {
+  if (state.settings.items_per_page > 1) {
+    state.settings.items_per_page = Math.max(1, state.settings.items_per_page - 1);
+    syncSettingsUI(); saveSettings();
+  }
+});
+$('ipp-plus').addEventListener('click', () => {
+  if (state.settings.items_per_page < 20) {
+    state.settings.items_per_page = Math.min(20, state.settings.items_per_page + 1);
+    syncSettingsUI(); saveSettings();
+  }
+});
+$('thr-minus').addEventListener('click', () => {
+  if (state.settings.threshold > 5) {
+    state.settings.threshold -= 5;
+    syncSettingsUI();
+  }
+});
+$('thr-plus').addEventListener('click', () => {
+  if (state.settings.threshold < 50) {
+    state.settings.threshold += 5;
+    syncSettingsUI();
+  }
+});
+
+// ══ EVENTS ═══════════════════════════════════════════════════════
+$('search-btn').addEventListener('click', () => doSearch(0));
+$('profitable-btn').addEventListener('click', () => {
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelector('[data-view="deals"]').classList.add('active');
+  $('view-deals').classList.add('active');
+  loadDeals(state.filters.q);
+});
+
+const debouncedSearch = debounce(() => {
+  state.filters.q = $('main-search').value;
+  renderChips();
+}, 600);
+$('main-search').addEventListener('input', debouncedSearch);
+$('main-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { state.filters.q = e.target.value; doSearch(0); }
+});
+
+const debouncedDeals = debounce(v => loadDeals(v), 700);
+$('deals-search').addEventListener('input', e => debouncedDeals(e.target.value));
+
+const debouncedHistory = debounce(v => loadHistory(v), 700);
+$('history-search').addEventListener('input', e => debouncedHistory(e.target.value));
+$('history-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadHistory(e.target.value);
+});
+
+// ══ BOOT ═════════════════════════════════════════════════════════
+initSheet();
+renderChips();
+loadSettings();
+</script>
+</body>
+</html>
