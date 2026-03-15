@@ -255,19 +255,20 @@ img{display:block}
       </div>
     </div>
     <div class="shs">
-      <div class="shl">Количество в стаке</div>
-      <div style="display:flex;gap:6px">
-        <input class="si" id="lqf" type="number" placeholder="От" min="1" style="flex:1;margin:0">
-        <input class="si" id="lqt" type="number" placeholder="До" min="1" style="flex:1;margin:0">
-      </div>
-    </div>
-    <div class="shs">
-      <div class="shl">Заточка</div>
+      <div class="shl">Параметры лота</div>
       <div class="ew">
-        <div class="ev" id="lev">Любая</div>
+        <div class="ev" id="lev">Заточка: Любая</div>
         <input type="range" class="esl" id="lesl" min="-1" max="15" value="-1" step="1">
         <div class="emk"><span class="em">Любая</span><span class="em">+0</span><span class="em">+5</span><span class="em">+10</span><span class="em">+15</span></div>
-        <button class="ecl" id="lecl" style="display:none">Сбросить</button>
+        <button class="ecl" id="lecl" style="display:none">Сбросить заточку</button>
+      </div>
+      <div style="margin-top:10px">
+        <div class="shl" style="margin-top:0">Изученность</div>
+        <div class="sr" id="lsr">
+          <button class="sc2" data-s="any">Любые</button>
+          <button class="sc2" data-s="studied">Только изученные</button>
+          <button class="sc2" data-s="unstudied">Только не изученные</button>
+        </div>
       </div>
     </div>
   </div>
@@ -355,7 +356,7 @@ const CATS = {
 
 // ══ СОСТОЯНИЕ ═══════════════════════════════════════════════
 const S = {
-  flt:    {cat:'', enh:-1, qf:null, qt:null},
+  flt:    {cat:'', enh:-1, qf:null, qt:null, studied:null},
   sort:   {f:'', d:''}, // три состояния: выключено / по убыванию / по возрастанию
   rarFilter: [],  // выбранные quality numbers для лотов
   prof:   false,
@@ -521,7 +522,12 @@ async function loadLots(page=0) {
       if(matched) p.set('rarity', matched[0]);
     }
     if(S.flt.enh>=0)p.set('enhancement',S.flt.enh);
-    if(S.flt.qf)p.set('qty_from',S.flt.qf); if(S.flt.qt)p.set('qty_to',S.flt.qt);
+    if(S.flt.studied!==null)p.set('studied',S.flt.studied);
+    // Количество в стаке не фильтруем для артефактов, но оставляем возможность для обычных предметов
+    if(!isArtCat(item.category||'')){
+      if(S.flt.qf)p.set('qty_from',S.flt.qf);
+      if(S.flt.qt)p.set('qty_to',S.flt.qt);
+    }
     const d=await fetch(`${BACKEND}/api/lots?${p}`).then(r=>r.json());
     lots=d.lots||[]; total=d.total||0; pages=d.pages||1;
     S.total=total; S.pages=pages;
@@ -553,7 +559,8 @@ function mkLotCard(lot) {
   const price=lot.buyoutPrice||lot.startPrice||0;
   const bid=lot.startPrice||0;
   const amt=lot.amount||1;
-  const pu=lot._perUnit||(amt>1&&price?Math.floor(price/amt):null);
+  // Для артефактов не показываем "количество в стаке" и цену за штуку
+  const pu=!art ? (lot._perUnit||(amt>1&&price?Math.floor(price/amt):null)) : null;
   const time=lot._timeLeft||fT(lot.endTime);
   const name=lot._name||item?.name||item?.id||'—';
   const urg=time.includes('м')&&parseInt(time)<15;
@@ -567,7 +574,7 @@ function mkLotCard(lot) {
     <div class="lbgs">
       <span class="bg bg-r" style="color:${clr};border-color:${clr}44">${rname}</span>
       ${enh>0?`<span class="bg bg-e">+${enh}</span>`:''}
-      ${amt>1?`<span class="bg bg-q">×${amt}</span>`:''}
+      ${(!art && amt>1)?`<span class="bg bg-q">×${amt}</span>`:''}
       ${studH}
     </div>
     <div class="lpr">
@@ -621,22 +628,37 @@ document.querySelectorAll('#sfld .sc2').forEach(b=>{
   });
 });
 
-// Количество и заточка для лотов
-const lqf=$('lqf'), lqt=$('lqt'), lesl=$('lesl'), lev=$('lev'), lecl=$('lecl');
-lqf.addEventListener('input',()=>{ S.flt.qf=parseInt(lqf.value)||null; });
-lqt.addEventListener('input',()=>{ S.flt.qt=parseInt(lqt.value)||null; });
+// Заточка и "изучен" для лотов
+const lesl=$('lesl'), lev=$('lev'), lecl=$('lecl');
 lesl.addEventListener('input',()=>{
   const v=parseInt(lesl.value);
   S.flt.enh=v;
-  lev.textContent=v<0?'Любая':`+${v}`;
+  lev.textContent=v<0?'Заточка: Любая':`Заточка: +${v}`;
   lecl.style.display=v>=0?'block':'none';
 });
 lecl.addEventListener('click',()=>{
   lesl.value=-1;
   S.flt.enh=-1;
-  lev.textContent='Любая';
+  lev.textContent='Заточка: Любая';
   lecl.style.display='none';
 });
+
+// Изучен / не изучен
+const lsr=$('lsr');
+if(lsr){
+  lsr.querySelectorAll('.sc2').forEach(b=>{
+    b.addEventListener('click',()=>{
+      lsr.querySelectorAll('.sc2').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      const mode=b.dataset.s;
+      if(mode==='studied') S.flt.studied=true;
+      else if(mode==='unstudied') S.flt.studied=false;
+      else S.flt.studied=null;
+    });
+  });
+  // по умолчанию "Любые"
+  lsr.querySelector('[data-s="any"]').classList.add('on');
+}
 
 // ══ ШТОРКА РЕДКОСТИ / РАНГА ════════════════════════════════
 function buildRarList() {
